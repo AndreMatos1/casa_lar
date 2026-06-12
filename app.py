@@ -173,6 +173,42 @@ FICHAS = [
 ]
 
 
+USUARIOS_INICIAIS = [
+    {
+        "id": "USR-001",
+        "nome": "Camila Rocha",
+        "email": "camila.rocha@casalar.org",
+        "perfil": "Professor",
+        "status": "Ativo",
+        "vinculo": "Ballet e Dancas Urbanas",
+    },
+    {
+        "id": "USR-002",
+        "nome": "Diego Martins",
+        "email": "diego.martins@casalar.org",
+        "perfil": "Professor",
+        "status": "Ativo",
+        "vinculo": "Futebol",
+    },
+    {
+        "id": "USR-003",
+        "nome": "Mariana Alves",
+        "email": "mariana.alves@casalar.org",
+        "perfil": "Gestor",
+        "status": "Ativo",
+        "vinculo": "Secretaria",
+    },
+    {
+        "id": "USR-004",
+        "nome": "Irene Costa",
+        "email": "irene.costa@casalar.org",
+        "perfil": "Diretor",
+        "status": "Ativo",
+        "vinculo": "Diretoria",
+    },
+]
+
+
 DIAS_SEMANA = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"]
 DIA_ATUAL_DEMO = "Sexta"
 
@@ -187,6 +223,7 @@ MENU_POR_PERFIL = {
         "Agenda",
         "Futebol",
         "Digitalizacao",
+        "Usuarios",
     ],
     "Diretor": [
         "Inicio",
@@ -197,6 +234,7 @@ MENU_POR_PERFIL = {
         "Agenda",
         "Futebol",
         "Digitalizacao",
+        "Usuarios",
     ],
 }
 
@@ -208,6 +246,7 @@ SUBMENUS = {
     "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados", "Chamada"],
     "Gestao de matriculas": ["Inscricoes", "Incluir em turma", "Pendencias"],
     "Digitalizacao": ["Enviar ficha", "Revisar dados", "Aprovar cadastro"],
+    "Usuarios": ["Lista", "Cadastrar", "Editar", "Excluir"],
     "Dashboard": ["Indicadores", "Oficinas", "Esportivo"],
 }
 
@@ -431,6 +470,21 @@ def botoes_submenu(pagina):
 def tabela_fechada(titulo, dados):
     with st.expander(titulo, expanded=False):
         st.dataframe(dados, use_container_width=True, hide_index=True)
+
+
+def inicializar_usuarios():
+    if "usuarios" not in st.session_state:
+        st.session_state.usuarios = [usuario.copy() for usuario in USUARIOS_INICIAIS]
+
+
+def proximo_id_usuario():
+    numeros = []
+    for usuario in st.session_state.usuarios:
+        try:
+            numeros.append(int(usuario["id"].split("-")[1]))
+        except (IndexError, ValueError):
+            continue
+    return f"USR-{max(numeros, default=0) + 1:03d}"
 
 
 def alunos_por_turma(turma):
@@ -777,6 +831,110 @@ def digitalizacao():
             st.success(f"Ficha {ficha} aprovada para cadastro.")
 
 
+def usuarios():
+    inicializar_usuarios()
+    st.header("Gestão de usuários")
+    subpagina = botoes_submenu("Usuarios")
+
+    if subpagina == "Lista":
+        busca = st.text_input("Buscar por nome, e-mail, perfil ou vínculo")
+        usuarios_filtrados = st.session_state.usuarios
+        if busca:
+            termo = busca.lower()
+            usuarios_filtrados = [
+                usuario for usuario in usuarios_filtrados if termo in str(usuario).lower()
+            ]
+        st.dataframe(usuarios_filtrados, use_container_width=True, hide_index=True)
+
+    elif subpagina == "Cadastrar":
+        with st.form("form_cadastrar_usuario"):
+            col1, col2 = st.columns(2)
+            nome = col1.text_input("Nome")
+            email = col2.text_input("E-mail")
+            perfil_usuario = col1.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
+            status_usuario = col2.selectbox("Status", ["Ativo", "Inativo"])
+            vinculo = st.text_input("Vínculo ou área", placeholder="Ex.: Futebol, Ballet, Secretaria")
+            senha_temp = st.text_input("Senha temporária", type="password")
+            salvar = st.form_submit_button("Cadastrar usuário")
+        if salvar:
+            if not nome or not email:
+                st.error("Informe nome e e-mail para cadastrar o usuário.")
+            else:
+                st.session_state.usuarios.append(
+                    {
+                        "id": proximo_id_usuario(),
+                        "nome": nome,
+                        "email": email,
+                        "perfil": perfil_usuario,
+                        "status": status_usuario,
+                        "vinculo": vinculo,
+                    }
+                )
+                st.success(f"Usuário {nome} cadastrado para teste.")
+                if senha_temp:
+                    st.caption("Senha temporária registrada apenas como simulação visual do fluxo.")
+
+    elif subpagina == "Editar":
+        if not st.session_state.usuarios:
+            st.info("Nenhum usuário cadastrado.")
+            return
+        usuario_id = st.selectbox(
+            "Usuário",
+            [usuario["id"] for usuario in st.session_state.usuarios],
+            format_func=lambda item_id: next(
+                usuario["nome"] for usuario in st.session_state.usuarios if usuario["id"] == item_id
+            ),
+        )
+        atual = next(usuario for usuario in st.session_state.usuarios if usuario["id"] == usuario_id)
+        with st.form("form_editar_usuario"):
+            col1, col2 = st.columns(2)
+            nome = col1.text_input("Nome", value=atual["nome"])
+            email = col2.text_input("E-mail", value=atual["email"])
+            perfil_usuario = col1.selectbox(
+                "Perfil",
+                ["Professor", "Gestor", "Diretor"],
+                index=["Professor", "Gestor", "Diretor"].index(atual["perfil"]),
+            )
+            status_usuario = col2.selectbox(
+                "Status",
+                ["Ativo", "Inativo"],
+                index=["Ativo", "Inativo"].index(atual["status"]),
+            )
+            vinculo = st.text_input("Vínculo ou área", value=atual["vinculo"])
+            salvar = st.form_submit_button("Salvar alterações")
+        if salvar:
+            atual.update(
+                {
+                    "nome": nome,
+                    "email": email,
+                    "perfil": perfil_usuario,
+                    "status": status_usuario,
+                    "vinculo": vinculo,
+                }
+            )
+            st.success("Usuário atualizado para teste.")
+
+    elif subpagina == "Excluir":
+        if not st.session_state.usuarios:
+            st.info("Nenhum usuário cadastrado.")
+            return
+        usuario_id = st.selectbox(
+            "Usuário para excluir",
+            [usuario["id"] for usuario in st.session_state.usuarios],
+            format_func=lambda item_id: next(
+                usuario["nome"] for usuario in st.session_state.usuarios if usuario["id"] == item_id
+            ),
+        )
+        atual = next(usuario for usuario in st.session_state.usuarios if usuario["id"] == usuario_id)
+        st.warning(f"Esta ação removerá {atual['nome']} da lista desta sessão de teste.")
+        confirmar = st.checkbox("Confirmo a exclusão deste usuário")
+        if st.button("Excluir usuário", disabled=not confirmar):
+            st.session_state.usuarios = [
+                usuario for usuario in st.session_state.usuarios if usuario["id"] != usuario_id
+            ]
+            st.success("Usuário excluído da sessão de teste.")
+
+
 def dashboard():
     st.header("Dashboard da direcao")
     subpagina = botoes_submenu("Dashboard")
@@ -798,6 +956,7 @@ def dashboard():
 
 
 aplicar_estilo()
+inicializar_usuarios()
 exibir_logo_sidebar()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
 professores = sorted({turma["professor"] for turma in TURMAS})
@@ -821,5 +980,7 @@ elif pagina == "Gestao de matriculas":
     gestao_matriculas()
 elif pagina == "Digitalizacao":
     digitalizacao()
+elif pagina == "Usuarios":
+    usuarios()
 elif pagina == "Dashboard":
     dashboard()
