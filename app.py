@@ -1,12 +1,14 @@
 from datetime import date
+from html import escape
 from pathlib import Path
+from urllib.parse import urlencode
 import streamlit as st
 
 
 LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
 
 st.set_page_config(
-    page_title="Irma Carmen Casa Lar",
+    page_title="Irmã Carmen Casa Lar",
     page_icon=str(LOGO_PATH),
     layout="wide",
 )
@@ -240,11 +242,17 @@ MENU_POR_PERFIL = {
 
 
 SUBMENUS = {
-    "Alunos": ["Consulta", "Meus alunos", "Cadastro", "Documentos"],
+    "Alunos": ["Consulta", "Meus alunos", "Cadastro", "Pendencias"],
     "Oficinas": ["Agenda semanal", "Minhas turmas", "Chamada"],
     "Agenda": ["Aulas", "Jogos", "Treinos", "Recados"],
     "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados", "Chamada"],
-    "Gestao de matriculas": ["Inscricoes", "Cadastro", "Incluir em turma", "Pendencias"],
+    "Gestao de matriculas": [
+        "Cadastrar nova atividade",
+        "Cadastrar novos alunos",
+        "Criar novas turmas",
+        "Pendencias",
+        "Base de inscritos",
+    ],
     "Digitalizacao": ["Enviar ficha", "Revisar dados", "Aprovar cadastro"],
     "Usuarios": ["Lista", "Cadastrar", "Editar", "Excluir"],
     "Dashboard": ["Indicadores", "Oficinas", "Esportivo"],
@@ -253,7 +261,7 @@ SUBMENUS = {
 
 ROTULOS = {
     "Inicio": "Início",
-    "Gestao de matriculas": "Gestão de matrícula",
+    "Gestao de matriculas": "Gestão de cadastro",
     "Inscricoes": "Inscrições",
     "Pendencias": "Pendências",
     "Digitalizacao": "Digitalização",
@@ -262,6 +270,10 @@ ROTULOS = {
     "Agenda treinos": "Agenda de treinos",
     "Meus alunos": "Meus alunos",
     "Minhas turmas": "Minhas turmas",
+    "Cadastrar nova atividade": "Cadastrar nova atividade",
+    "Cadastrar novos alunos": "Cadastrar novos alunos",
+    "Criar novas turmas": "Criar novas turmas",
+    "Base de inscritos": "Base de inscritos",
 }
 
 
@@ -429,6 +441,75 @@ def aplicar_estilo():
             border-color: #2563eb;
             background: #eff6ff;
         }
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(130px, 1fr));
+            border: 1px solid #d9e2ec;
+            border-radius: 14px;
+            overflow-x: auto;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+        }
+        .agenda-day {
+            min-height: 316px;
+            padding: 10px;
+            border-right: 1px solid #e5edf5;
+            border-bottom: 1px solid #e5edf5;
+            border-radius: 0;
+            background:
+                linear-gradient(#eef3f8 1px, transparent 1px),
+                linear-gradient(90deg, #f3f6fa 1px, transparent 1px),
+                #ffffff;
+            background-size: 100% 56px, 56px 100%, 100% 100%;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        .agenda-day.today {
+            border-color: #2563eb;
+            background:
+                linear-gradient(#dceafe 1px, transparent 1px),
+                linear-gradient(90deg, #e7efff 1px, transparent 1px),
+                #f8fbff;
+            background-size: 100% 56px, 56px 100%, 100% 100%;
+        }
+        .agenda-day .card {
+            margin-bottom: 10px;
+        }
+        .agenda-event {
+            display: block;
+            min-height: 76px;
+            margin-top: 10px;
+            padding: 12px;
+            border: 1px solid #d9e2ec;
+            border-radius: 10px;
+            background: rgba(248, 250, 252, 0.92);
+            color: #0f172a !important;
+            text-align: center;
+            text-decoration: none !important;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+        }
+        .agenda-event:hover {
+            border-color: #2563eb;
+            background: #edf4ff;
+        }
+        .agenda-slot {
+            min-height: 76px;
+            padding: 12px;
+            border: 1px solid #d9e2ec;
+            border-radius: 10px;
+            background: rgba(248, 250, 252, 0.92);
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+        }
+        .agenda-empty {
+            color: #98a2b3;
+            font-size: 0.9rem;
+            padding: 12px 2px;
+        }
+        @media (max-width: 900px) {
+            .agenda-grid {
+                grid-template-columns: repeat(6, minmax(190px, 1fr));
+            }
+        }
         .muted {
             color: #667085;
             font-size: 0.9rem;
@@ -453,10 +534,28 @@ def exibir_logo_inicio():
 
 def navegar_para(pagina, subpagina=None, turma=None):
     st.session_state.pagina = pagina
+    st.query_params["page"] = pagina
     if subpagina:
         st.session_state[f"subpagina_{pagina}"] = subpagina
+        st.query_params["sub"] = subpagina
+    elif "sub" in st.query_params:
+        del st.query_params["sub"]
     if turma:
         st.session_state.turma_selecionada = turma
+        st.query_params["turma"] = turma
+    elif "turma" in st.query_params:
+        del st.query_params["turma"]
+    if "aluno" in st.query_params:
+        del st.query_params["aluno"]
+
+
+def abrir_cadastro_aluno(aluno_id):
+    st.session_state.pagina = "Alunos"
+    st.session_state.subpagina_Alunos = "Cadastro"
+    st.session_state.aluno_selecionado = aluno_id
+    st.query_params["page"] = "Alunos"
+    st.query_params["sub"] = "Cadastro"
+    st.query_params["aluno"] = aluno_id
 
 
 def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False, key_suffix=""):
@@ -476,6 +575,7 @@ def aplicar_query_params(perfil):
     pagina = params.get("page")
     subpagina = params.get("sub")
     turma = params.get("turma")
+    aluno = params.get("aluno")
     paginas = MENU_POR_PERFIL[perfil]
 
     if pagina in paginas:
@@ -492,6 +592,8 @@ def aplicar_query_params(perfil):
 
     if turma:
         st.session_state.turma_selecionada = turma
+    if aluno:
+        st.session_state.aluno_selecionado = aluno
 
 
 def selecionar_pagina(perfil):
@@ -559,6 +661,46 @@ def tabela_fechada(titulo, dados):
         st.dataframe(dados_para_exibicao(dados), use_container_width=True, hide_index=True)
 
 
+def status_cadastro_aluno(aluno):
+    if aluno["status"] == "Pendente":
+        return "Com pendência"
+    return "Completo"
+
+
+def pendencia_aluno(aluno):
+    if aluno["status"] != "Pendente":
+        return "-"
+    return aluno.get("observacoes") or "Cadastro pendente"
+
+
+def lista_alunos_com_acesso(titulo, alunos):
+    st.subheader(titulo)
+    if not alunos:
+        st.info("Nenhum aluno encontrado.")
+        return
+
+    cabecalho = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
+    cabecalho[0].markdown("**Aluno**")
+    cabecalho[1].markdown("**Turma**")
+    cabecalho[2].markdown("**Status**")
+    cabecalho[3].markdown("**Pendência**")
+    cabecalho[4].markdown("**Cadastro**")
+
+    for aluno in alunos:
+        linha = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
+        linha[0].write(aluno["nome"])
+        linha[1].write(aluno["turma"])
+        linha[2].write(status_cadastro_aluno(aluno))
+        linha[3].write(pendencia_aluno(aluno))
+        linha[4].button(
+            "Abrir cadastro",
+            key=f"abrir_cadastro_{titulo}_{aluno['id']}",
+            use_container_width=True,
+            on_click=abrir_cadastro_aluno,
+            args=(aluno["id"],),
+        )
+
+
 def inicializar_usuarios():
     if "usuarios" not in st.session_state:
         st.session_state.usuarios = [usuario.copy() for usuario in USUARIOS_INICIAIS]
@@ -586,7 +728,40 @@ def alunos_do_professor(professor):
     return [aluno for aluno in ALUNOS if aluno["professor"] == professor]
 
 
-def formulario_cadastro_aluno(form_key="cadastro_aluno"):
+def formulario_cadastro_aluno(form_key="cadastro_aluno", aluno=None):
+    if aluno:
+        st.subheader(f"Cadastro de {aluno['nome']}")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Status do cadastro", status_cadastro_aluno(aluno))
+        col2.metric("Turma", aluno["turma"])
+        col3.metric("Idade", aluno["idade"])
+
+        st.write(f"**Responsável:** {aluno['responsavel']}")
+        st.write(f"**Telefone:** {aluno['telefone']}")
+        st.write(f"**Pendência:** {pendencia_aluno(aluno)}")
+
+        with st.expander("Dados do cadastro", expanded=True):
+            st.text_input("Nome da criança", value=aluno["nome"], key=f"{form_key}_nome")
+            st.text_input("Responsável", value=aluno["responsavel"], key=f"{form_key}_responsavel")
+            st.text_input("WhatsApp", value=aluno["telefone"], key=f"{form_key}_telefone")
+            st.text_input("Turma", value=aluno["turma"], key=f"{form_key}_turma")
+            opcoes_status = ["Ativo", "Pendente", "Inativo"]
+            st.selectbox(
+                "Status da matrícula",
+                opcoes_status,
+                index=opcoes_status.index(aluno["status"]) if aluno["status"] in opcoes_status else 0,
+                key=f"{form_key}_status",
+            )
+            st.text_area("Observações", value=aluno.get("observacoes", ""), key=f"{form_key}_obs")
+            st.file_uploader(
+                "Enviar documento deste aluno",
+                type=["pdf", "png", "jpg", "jpeg"],
+                key=f"{form_key}_upload",
+            )
+            if st.button("Salvar alterações de teste", key=f"{form_key}_salvar"):
+                st.success(f"Cadastro de {aluno['nome']} atualizado para demonstração.")
+        return
+
     with st.form(form_key):
         col1, col2 = st.columns(2)
         nome = col1.text_input("Nome da criança")
@@ -634,25 +809,42 @@ def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=
 
 def agenda_semanal(turmas, destino="Oficinas"):
     st.subheader("Agenda semanal")
-    cols = st.columns(len(DIAS_SEMANA))
-    for dia_index, (col, dia) in enumerate(zip(cols, DIAS_SEMANA)):
+    colunas_html = []
+    for dia in DIAS_SEMANA:
         eventos = [turma for turma in turmas if dia in turma["dias"]]
-        classe = "card today-card" if dia == DIA_ATUAL_DEMO else "card"
-        col.markdown(
-            f"<div class='{classe}'><strong>{dia}</strong><br><span class='muted'>{'Hoje' if dia == DIA_ATUAL_DEMO else 'Semana'}</span></div>",
-            unsafe_allow_html=True,
-        )
+        classe = "agenda-day today" if dia == DIA_ATUAL_DEMO else "agenda-day"
+        eventos_html = []
         if not eventos:
-            col.caption("Sem atividades")
-        for evento_index, turma in enumerate(eventos):
-            with col:
-                nav_link(
-                    f"{turma['horario']} | {turma['turma']}",
-                    destino,
-                    "Minhas turmas" if destino == "Oficinas" else "Turmas",
-                    turma["turma"],
-                    key_suffix=f"agenda_{destino}_{dia_index}_{evento_index}",
+            eventos_html.append("<div class='agenda-empty'>Sem atividades</div>")
+        for turma in eventos:
+            subpagina = "Minhas turmas" if destino == "Oficinas" else "Turmas"
+            href = "?" + urlencode({"page": destino, "sub": subpagina, "turma": turma["turma"]})
+            eventos_html.append(
+                "<a class='agenda-event' href='{href}' target='_self'>"
+                "<span>{horario} | {turma}</span>"
+                "</a>".format(
+                    href=escape(href, quote=True),
+                    horario=escape(turma["horario"]),
+                    turma=escape(turma["turma"]),
                 )
+            )
+        colunas_html.append(
+            "<div class='{classe}'>"
+            "<div class='card {today_card}'><strong>{dia}</strong><br>"
+            "<span class='muted'>{rotulo}</span></div>"
+            "{eventos}"
+            "</div>".format(
+                classe=classe,
+                today_card="today-card" if dia == DIA_ATUAL_DEMO else "",
+                dia=escape(dia),
+                rotulo="Hoje" if dia == DIA_ATUAL_DEMO else "Semana",
+                eventos="".join(eventos_html),
+            )
+        )
+    st.markdown(
+        "<div class='agenda-grid'>{}</div>".format("".join(colunas_html)),
+        unsafe_allow_html=True,
+    )
 
 
 def chamada_turma(turma_nome):
@@ -721,7 +913,7 @@ def chamada_turma(turma_nome):
 
 def inicio(perfil, professor):
     exibir_logo_inicio()
-    st.title("Irma Carmen Casa Lar")
+    st.title("Irmã Carmen Casa Lar")
     st.caption("Protótipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
 
@@ -758,7 +950,7 @@ def alunos(perfil, professor):
         if buscar and busca:
             termo = busca.lower()
             filtrados = [aluno for aluno in base if termo in str(aluno).lower()]
-        st.dataframe(dados_para_exibicao(filtrados), use_container_width=True, hide_index=True)
+        lista_alunos_com_acesso("Resultado da consulta", filtrados)
 
     elif subpagina == "Meus alunos":
         st.caption("Alunos vinculados às turmas do professor selecionado.")
@@ -772,7 +964,7 @@ def alunos(perfil, professor):
             filtrados = [aluno for aluno in filtrados if aluno["turma"] == filtro_turma]
         if filtro_status != "Todos":
             filtrados = [aluno for aluno in filtrados if aluno["status"] == filtro_status]
-        tabela_fechada("Meus alunos", filtrados)
+        lista_alunos_com_acesso("Meus alunos", filtrados)
         if filtro_turma != "Todas":
             nav_link(
                 "Abrir turma selecionada",
@@ -783,11 +975,16 @@ def alunos(perfil, professor):
             )
 
     elif subpagina == "Cadastro":
-        formulario_cadastro_aluno("cadastro_aluno")
+        aluno_id = st.session_state.get("aluno_selecionado")
+        aluno = next((item for item in base if item["id"] == aluno_id), None)
+        if aluno_id and not aluno:
+            st.warning("Aluno selecionado não encontrado para este perfil.")
+        formulario_cadastro_aluno("cadastro_aluno", aluno)
 
-    elif subpagina == "Documentos":
-        tabela_fechada("Documentos pendentes", FICHAS)
-        st.file_uploader("Enviar documento do aluno", type=["pdf", "png", "jpg", "jpeg"])
+    elif subpagina == "Pendencias":
+        pendentes = [item for item in base if item["status"] == "Pendente"]
+        lista_alunos_com_acesso("Pendências dos alunos", pendentes)
+        tabela_fechada("Fichas pendentes de revisão", FICHAS)
 
 
 def oficinas(perfil, professor):
@@ -900,20 +1097,55 @@ def futebol(perfil, professor):
 
 
 def gestao_matriculas():
-    st.header("Gestão de matrícula")
+    st.header("Gestão de cadastro")
     subpagina = botoes_submenu("Gestao de matriculas")
 
-    if subpagina == "Inscricoes":
-        tabela_fechada("Inscrições recebidas", ALUNOS)
-    elif subpagina == "Cadastro":
+    if subpagina == "Cadastrar nova atividade":
+        with st.form("cadastro_atividade"):
+            col1, col2 = st.columns(2)
+            oficina = col1.text_input("Oficina", placeholder="Ex.: Esportes, Música, Danças")
+            modalidade = col2.text_input("Atividade", placeholder="Ex.: Futebol, Violão, Ballet")
+            responsavel = col1.text_input("Professor ou responsável")
+            local = col2.text_input("Local")
+            descricao = st.text_area("Observações da atividade")
+            salvar = st.form_submit_button("Cadastrar atividade")
+        if salvar:
+            if not oficina or not modalidade:
+                st.error("Informe a oficina e a atividade.")
+            else:
+                st.success(f"Atividade {modalidade} cadastrada para demonstração.")
+                if descricao:
+                    st.caption(descricao)
+
+    elif subpagina == "Cadastrar novos alunos":
         formulario_cadastro_aluno("cadastro_aluno_matriculas")
-    elif subpagina == "Incluir em turma":
-        aluno = st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
-        turma = st.selectbox("Turma", [item["turma"] for item in TURMAS])
-        if st.button("Incluir aluno na turma"):
-            st.success(f"{aluno} incluído em {turma} para demonstração.")
+
+    elif subpagina == "Criar novas turmas":
+        with st.form("cadastro_turma"):
+            col1, col2 = st.columns(2)
+            nome_turma = col1.text_input("Nome da turma")
+            modalidade = col2.selectbox("Atividade", sorted({item["modalidade"] for item in TURMAS}))
+            professor = col1.selectbox("Professor", sorted({item["professor"] for item in TURMAS}))
+            vagas = col2.number_input("Vagas", min_value=1, max_value=80, value=20)
+            dias = st.multiselect("Dias da semana", DIAS_SEMANA)
+            horario = col1.text_input("Horário", placeholder="Ex.: 09:00 - 10:15")
+            local = col2.text_input("Local")
+            salvar = st.form_submit_button("Criar turma")
+        if salvar:
+            if not nome_turma or not dias or not horario:
+                st.error("Informe nome, dias e horário da turma.")
+            else:
+                st.success(f"Turma {nome_turma} criada para demonstração.")
+
     elif subpagina == "Pendencias":
-        tabela_fechada("Pendências de matrícula", [item for item in ALUNOS if item["status"] == "Pendente"])
+        lista_alunos_com_acesso(
+            "Pendências de cadastro",
+            [item for item in ALUNOS if item["status"] == "Pendente"],
+        )
+
+    elif subpagina == "Base de inscritos":
+        st.caption("Consulta geral da base demonstrativa, incluindo alunos ativos, pendentes e inativos.")
+        lista_alunos_com_acesso("Base de inscritos", ALUNOS)
 
 
 def digitalizacao():
@@ -1066,9 +1298,7 @@ exibir_logo_sidebar()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
 professores = sorted({turma["professor"] for turma in TURMAS})
 professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
-if "query_params_aplicados" not in st.session_state:
-    aplicar_query_params(perfil)
-    st.session_state.query_params_aplicados = True
+aplicar_query_params(perfil)
 pagina = selecionar_pagina(perfil)
 
 if pagina == "Inicio":
