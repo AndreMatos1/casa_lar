@@ -1,3 +1,4 @@
+import base64
 from datetime import date
 from html import escape
 from pathlib import Path
@@ -413,21 +414,30 @@ def aplicar_estilo():
         section[data-testid="stSidebar"] label[data-baseweb="radio"] > div:first-child {
             display: none;
         }
+        .login-logo-wrap {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .login-logo {
+            width: min(460px, 100%);
+            max-height: 250px;
+            object-fit: contain;
+        }
         .login-title {
-            text-align: left;
+            text-align: center;
             color: #0f172a;
             font-size: 1.7rem;
             font-weight: 800;
             margin: 16px 0 8px 0;
         }
         .login-subtitle {
-            text-align: left;
+            text-align: center;
             color: #667085;
             font-size: 0.95rem;
             margin-bottom: 28px;
         }
         .login-spacer {
-            height: 42px;
+            height: 28px;
         }
         .login-divider {
             height: 1px;
@@ -572,10 +582,20 @@ def exibir_logo_inicio():
         center.image(str(LOGO_PATH), width=360)
 
 
+def imagem_base64(caminho):
+    return base64.b64encode(caminho.read_bytes()).decode("utf-8")
+
+
 def exibir_logo_login():
     if LOGO_PATH.exists():
-        left, center, right = st.columns([1, 1.2, 1])
-        center.image(str(LOGO_PATH), width=330)
+        st.markdown(
+            f"""
+            <div class="login-logo-wrap">
+                <img class="login-logo" src="data:image/png;base64,{imagem_base64(LOGO_PATH)}" alt="Casa Lar">
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def usuario_para_login(valor):
@@ -611,9 +631,9 @@ def sair():
 
 def tela_login():
     st.markdown("<div class='login-spacer'></div>", unsafe_allow_html=True)
-    exibir_logo_login()
     left, center, right = st.columns([1, 1.25, 1])
     with center:
+        exibir_logo_login()
         st.markdown(
             """
             <div class="login-title">Acesso ao Sistema</div>
@@ -627,7 +647,7 @@ def tela_login():
             senha = st.text_input("Senha", type="password", placeholder="507@Dias")
             with st.expander("Esqueci minha senha", expanded=False):
                 st.caption("Neste protótipo, solicite a redefinição para um gestor do sistema.")
-            acessar = st.form_submit_button("Entrar")
+            acessar = st.form_submit_button("Entrar", use_container_width=True)
 
         if acessar:
             usuario_encontrado = autenticar_usuario(usuario, senha)
