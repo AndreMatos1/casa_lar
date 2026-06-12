@@ -240,6 +240,40 @@ def aplicar_estilo():
             justify-content: flex-start;
             text-align: left;
         }
+        section[data-testid="stSidebar"] div[role="radiogroup"] {
+            gap: 8px;
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"] {
+            width: 100%;
+            min-height: 46px;
+            margin: 0 0 8px 0;
+            padding: 0 14px;
+            border-radius: 14px;
+            border: 1px solid #cfd8e3;
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+            display: flex;
+            align-items: center;
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"]:hover {
+            border-color: #2563eb;
+            background: #edf4ff;
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"]:has(input:checked) {
+            border-color: #1d4ed8;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.24);
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"]:has(input:checked) p {
+            color: #ffffff;
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"] p {
+            color: #1d2733;
+            font-weight: 700;
+        }
+        section[data-testid="stSidebar"] label[data-baseweb="radio"] > div:first-child {
+            display: none;
+        }
         .card {
             border: 1px solid #d9e2ec;
             border-radius: 14px;
@@ -280,12 +314,15 @@ def selecionar_pagina(perfil):
 
     st.sidebar.title("Casa Lar")
     st.sidebar.caption("Menu por perfil")
-
-    for pagina in paginas:
-        ativo = pagina == st.session_state.pagina
-        label = f"> {pagina}" if ativo else pagina
-        if st.sidebar.button(label, key=f"menu_{pagina}", disabled=ativo):
-            navegar_para(pagina, SUBMENUS.get(pagina, ["Principal"])[0])
+    selecionada = st.sidebar.radio(
+        "Navegacao principal",
+        paginas,
+        index=paginas.index(st.session_state.pagina),
+        key=f"menu_lateral_{perfil}",
+        label_visibility="collapsed",
+    )
+    if selecionada != st.session_state.pagina:
+        navegar_para(selecionada, SUBMENUS.get(selecionada, ["Principal"])[0])
 
     st.sidebar.divider()
     st.sidebar.caption(f"Perfil ativo: {perfil}")
