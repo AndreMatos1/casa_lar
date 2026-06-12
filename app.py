@@ -413,26 +413,26 @@ def aplicar_estilo():
         section[data-testid="stSidebar"] label[data-baseweb="radio"] > div:first-child {
             display: none;
         }
-        .login-panel {
-            max-width: 460px;
-            margin: 0 auto;
-            padding: 22px 24px;
-            border: 1px solid #d9e2ec;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
-        }
         .login-title {
-            text-align: center;
+            text-align: left;
             color: #0f172a;
-            font-size: 1.65rem;
+            font-size: 1.7rem;
             font-weight: 800;
-            margin-bottom: 4px;
+            margin: 16px 0 8px 0;
         }
         .login-subtitle {
-            text-align: center;
+            text-align: left;
             color: #667085;
-            margin-bottom: 18px;
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+        .login-spacer {
+            height: 42px;
+        }
+        .login-divider {
+            height: 1px;
+            background: #d0d5dd;
+            margin: 0 0 28px 0;
         }
         a.nav-link, a.side-nav-link {
             display: flex;
@@ -574,8 +574,8 @@ def exibir_logo_inicio():
 
 def exibir_logo_login():
     if LOGO_PATH.exists():
-        left, center, right = st.columns([1.2, 1, 1.2])
-        center.image(str(LOGO_PATH), width=210)
+        left, center, right = st.columns([1, 1.2, 1])
+        center.image(str(LOGO_PATH), width=330)
 
 
 def usuario_para_login(valor):
@@ -610,27 +610,31 @@ def sair():
 
 
 def tela_login():
+    st.markdown("<div class='login-spacer'></div>", unsafe_allow_html=True)
     exibir_logo_login()
-    st.markdown(
-        """
-        <div class="login-panel">
-            <div class="login-title">Acesso Casa Lar</div>
-            <div class="login-subtitle">Entre com seu usuário para abrir o menu do seu perfil.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    with st.form("login"):
-        usuario = st.text_input("Usuário", placeholder="andre.matos")
-        senha = st.text_input("Senha", type="password", placeholder="507@Dias")
-        acessar = st.form_submit_button("Entrar")
+    left, center, right = st.columns([1, 1.25, 1])
+    with center:
+        st.markdown(
+            """
+            <div class="login-title">Acesso ao Sistema</div>
+            <div class="login-subtitle">Informe seu usuário e senha para continuar</div>
+            <div class="login-divider"></div>
+            """,
+            unsafe_allow_html=True,
+        )
+        with st.form("login"):
+            usuario = st.text_input("Usuário", placeholder="andre.matos")
+            senha = st.text_input("Senha", type="password", placeholder="507@Dias")
+            with st.expander("Esqueci minha senha", expanded=False):
+                st.caption("Neste protótipo, solicite a redefinição para um gestor do sistema.")
+            acessar = st.form_submit_button("Entrar")
 
-    if acessar:
-        usuario_encontrado = autenticar_usuario(usuario, senha)
-        if usuario_encontrado:
-            entrar(usuario_encontrado)
-            st.rerun()
-        st.error("Usuário ou senha inválidos, ou usuário inativo.")
+        if acessar:
+            usuario_encontrado = autenticar_usuario(usuario, senha)
+            if usuario_encontrado:
+                entrar(usuario_encontrado)
+                st.rerun()
+            st.error("Usuário ou senha inválidos, ou usuário inativo.")
 
 
 def navegar_para(pagina, subpagina=None, turma=None):
