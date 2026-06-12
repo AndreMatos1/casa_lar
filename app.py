@@ -19,7 +19,7 @@ ALUNOS = [
         "idade": 8,
         "responsavel": "Mariana Santos",
         "telefone": "(11) 90000-0101",
-        "oficina": "Dancas",
+        "oficina": "Danças",
         "modalidade": "Ballet",
         "turma": "Ballet Infantil A",
         "professor": "Camila Rocha",
@@ -43,9 +43,9 @@ ALUNOS = [
         "idade": 10,
         "responsavel": "Patricia Lima",
         "telefone": "(11) 90000-0303",
-        "oficina": "Dancas",
-        "modalidade": "Dancas Urbanas",
-        "turma": "Dancas Urbanas I",
+        "oficina": "Danças",
+        "modalidade": "Danças Urbanas",
+        "turma": "Danças Urbanas I",
         "professor": "Camila Rocha",
         "status": "Pendente",
     },
@@ -67,7 +67,7 @@ ALUNOS = [
         "idade": 7,
         "responsavel": "Renata Nascimento",
         "telefone": "(11) 90000-0505",
-        "oficina": "Dancas",
+        "oficina": "Danças",
         "modalidade": "Ballet",
         "turma": "Ballet Infantil A",
         "professor": "Camila Rocha",
@@ -78,7 +78,7 @@ ALUNOS = [
 
 TURMAS = [
     {
-        "oficina": "Dancas",
+        "oficina": "Danças",
         "modalidade": "Ballet",
         "turma": "Ballet Infantil A",
         "professor": "Camila Rocha",
@@ -89,11 +89,11 @@ TURMAS = [
         "matriculados": 12,
     },
     {
-        "oficina": "Dancas",
-        "modalidade": "Dancas Urbanas",
-        "turma": "Dancas Urbanas I",
+        "oficina": "Danças",
+        "modalidade": "Danças Urbanas",
+        "turma": "Danças Urbanas I",
         "professor": "Camila Rocha",
-        "dias": ["Terca", "Quinta"],
+        "dias": ["Terça", "Quinta"],
         "horario": "10:30 - 11:30",
         "local": "Sala de Danca",
         "vagas": 18,
@@ -115,20 +115,20 @@ TURMAS = [
         "modalidade": "Futebol",
         "turma": "Sub-14 Futebol",
         "professor": "Diego Martins",
-        "dias": ["Terca", "Quinta"],
+        "dias": ["Terça", "Quinta"],
         "horario": "15:30 - 17:00",
         "local": "Campo Principal",
         "vagas": 25,
         "matriculados": 21,
     },
     {
-        "oficina": "Musica",
-        "modalidade": "Violao",
-        "turma": "Violao Iniciante",
+        "oficina": "Música",
+        "modalidade": "Violão",
+        "turma": "Violão Iniciante",
         "professor": "Marcos Araujo",
         "dias": ["Segunda"],
         "horario": "14:00 - 15:30",
-        "local": "Sala de Musica",
+        "local": "Sala de Música",
         "vagas": 15,
         "matriculados": 9,
     },
@@ -180,7 +180,7 @@ USUARIOS_INICIAIS = [
         "email": "camila.rocha@casalar.org",
         "perfil": "Professor",
         "status": "Ativo",
-        "vinculo": "Ballet e Dancas Urbanas",
+        "vinculo": "Ballet e Danças Urbanas",
     },
     {
         "id": "USR-002",
@@ -209,7 +209,7 @@ USUARIOS_INICIAIS = [
 ]
 
 
-DIAS_SEMANA = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"]
+DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
 DIA_ATUAL_DEMO = "Sexta"
 
 
@@ -244,10 +244,57 @@ SUBMENUS = {
     "Oficinas": ["Agenda semanal", "Minhas turmas", "Chamada"],
     "Agenda": ["Aulas", "Jogos", "Treinos", "Recados"],
     "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados", "Chamada"],
-    "Gestao de matriculas": ["Inscricoes", "Incluir em turma", "Pendencias"],
+    "Gestao de matriculas": ["Inscricoes", "Cadastro", "Incluir em turma", "Pendencias"],
     "Digitalizacao": ["Enviar ficha", "Revisar dados", "Aprovar cadastro"],
     "Usuarios": ["Lista", "Cadastrar", "Editar", "Excluir"],
     "Dashboard": ["Indicadores", "Oficinas", "Esportivo"],
+}
+
+
+ROTULOS = {
+    "Inicio": "Início",
+    "Gestao de matriculas": "Gestão de matrícula",
+    "Inscricoes": "Inscrições",
+    "Pendencias": "Pendências",
+    "Digitalizacao": "Digitalização",
+    "Usuarios": "Usuários",
+    "Agenda jogo": "Agenda de jogos",
+    "Agenda treinos": "Agenda de treinos",
+    "Meus alunos": "Meus alunos",
+    "Minhas turmas": "Minhas turmas",
+}
+
+
+COLUNAS_EXIBICAO = {
+    "id": "ID",
+    "nome": "Nome",
+    "idade": "Idade",
+    "responsavel": "Responsável",
+    "telefone": "Telefone",
+    "oficina": "Oficina",
+    "modalidade": "Modalidade",
+    "turma": "Turma",
+    "professor": "Professor",
+    "status": "Status",
+    "dias": "Dias",
+    "horario": "Horário",
+    "local": "Local",
+    "vagas": "Vagas",
+    "matriculados": "Matriculados",
+    "categoria": "Categoria",
+    "competicao": "Competição",
+    "data": "Data",
+    "adversario": "Adversário",
+    "placar": "Placar",
+    "arquivo": "Arquivo",
+    "nome_detectado": "Nome detectado",
+    "responsavel_detectado": "Responsável detectado",
+    "confianca": "Confiança",
+    "aluno": "Aluno",
+    "observacao": "Observação",
+    "email": "E-mail",
+    "perfil": "Perfil",
+    "vinculo": "Vínculo",
 }
 
 
@@ -268,6 +315,22 @@ def aplicar_estilo():
             min-height: 42px;
             padding: 0.62rem 0.9rem;
             box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+        }
+        div.stFormSubmitButton > button {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid #1d4ed8;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            min-height: 42px;
+            padding: 0.62rem 0.9rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.24);
+        }
+        div.stFormSubmitButton > button:hover {
+            border-color: #1746a2;
+            background: #1746a2;
+            color: #ffffff;
         }
         div.stButton > button:hover {
             border-color: #2563eb;
@@ -399,7 +462,7 @@ def navegar_para(pagina, subpagina=None, turma=None):
 def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False, key_suffix=""):
     key = f"nav_{'side' if sidebar else 'main'}_{label}_{pagina}_{subpagina}_{turma}_{key_suffix}"
     st.button(
-        label,
+        ROTULOS.get(label, label),
         key=key,
         disabled=active,
         use_container_width=True,
@@ -467,9 +530,33 @@ def botoes_submenu(pagina):
     return st.session_state[chave]
 
 
+def formatar_data_br(valor):
+    if not valor:
+        return valor
+    texto = str(valor)
+    try:
+        if len(texto) == 10 and texto[4] == "-" and texto[7] == "-":
+            ano, mes, dia = texto.split("-")
+            return f"{dia}/{mes}/{ano}"
+    except ValueError:
+        return valor
+    return valor
+
+
+def dados_para_exibicao(dados):
+    exibicao = []
+    for item in dados:
+        novo = {}
+        for chave, valor in item.items():
+            rotulo = COLUNAS_EXIBICAO.get(chave, chave)
+            novo[rotulo] = formatar_data_br(valor) if chave == "data" else valor
+        exibicao.append(novo)
+    return exibicao
+
+
 def tabela_fechada(titulo, dados):
     with st.expander(titulo, expanded=False):
-        st.dataframe(dados, use_container_width=True, hide_index=True)
+        st.dataframe(dados_para_exibicao(dados), use_container_width=True, hide_index=True)
 
 
 def inicializar_usuarios():
@@ -497,6 +584,26 @@ def turmas_do_professor(professor):
 
 def alunos_do_professor(professor):
     return [aluno for aluno in ALUNOS if aluno["professor"] == professor]
+
+
+def formulario_cadastro_aluno(form_key="cadastro_aluno"):
+    with st.form(form_key):
+        col1, col2 = st.columns(2)
+        nome = col1.text_input("Nome da criança")
+        responsavel = col2.text_input("Responsável")
+        telefone = col1.text_input("WhatsApp")
+        idade = col2.number_input("Idade", min_value=0, max_value=18, value=8)
+        turma = col1.selectbox("Turma", [item["turma"] for item in TURMAS])
+        status = col2.selectbox("Status da matrícula", ["Ativo", "Pendente", "Inativo"])
+        observacoes = st.text_area("Observações")
+        enviar = st.form_submit_button("Cadastrar aluno")
+    if enviar:
+        if not nome or not responsavel:
+            st.error("Informe o nome da criança e o responsável.")
+        else:
+            st.success(f"Cadastro de {nome} registrado para teste.")
+            if observacoes:
+                st.caption(f"Observações: {observacoes}")
 
 
 def metricas():
@@ -559,7 +666,7 @@ def chamada_turma(turma_nome):
         st.session_state.chamadas_salvas = []
 
     with st.form(f"chamada_{turma_nome}"):
-        data_chamada = st.date_input("Data da chamada", value=date.today())
+        data_chamada = st.date_input("Data da chamada", value=date.today(), format="DD/MM/YYYY")
         st.caption("Marque presente ou ausente e, se necessário, registre uma observação curta por aluno.")
 
         header = st.columns([3, 2, 3])
@@ -615,7 +722,7 @@ def chamada_turma(turma_nome):
 def inicio(perfil, professor):
     exibir_logo_inicio()
     st.title("Irma Carmen Casa Lar")
-    st.caption("Prototipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
+    st.caption("Protótipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
 
     st.subheader("Atalhos")
@@ -645,16 +752,16 @@ def alunos(perfil, professor):
 
     if subpagina == "Consulta":
         with st.form("busca_aluno"):
-            busca = st.text_input("Buscar aluno, responsavel, turma ou oficina")
+            busca = st.text_input("Buscar aluno, responsável, turma ou oficina")
             buscar = st.form_submit_button("Buscar")
         filtrados = base
         if buscar and busca:
             termo = busca.lower()
             filtrados = [aluno for aluno in base if termo in str(aluno).lower()]
-        st.dataframe(filtrados, use_container_width=True, hide_index=True)
+        st.dataframe(dados_para_exibicao(filtrados), use_container_width=True, hide_index=True)
 
     elif subpagina == "Meus alunos":
-        st.caption("Alunos vinculados as turmas do professor selecionado.")
+        st.caption("Alunos vinculados às turmas do professor selecionado.")
         turmas = ["Todas"] + sorted({aluno["turma"] for aluno in base})
         status = ["Todos"] + sorted({aluno["status"] for aluno in base})
         col1, col2 = st.columns(2)
@@ -676,14 +783,7 @@ def alunos(perfil, professor):
             )
 
     elif subpagina == "Cadastro":
-        with st.form("cadastro_aluno"):
-            nome = st.text_input("Nome da crianca")
-            responsavel = st.text_input("Responsavel")
-            telefone = st.text_input("WhatsApp")
-            turma = st.selectbox("Turma", [item["turma"] for item in TURMAS])
-            enviar = st.form_submit_button("Salvar cadastro de teste")
-            if enviar:
-                st.success(f"Cadastro de {nome or 'novo aluno'} simulado com sucesso.")
+        formulario_cadastro_aluno("cadastro_aluno")
 
     elif subpagina == "Documentos":
         tabela_fechada("Documentos pendentes", FICHAS)
@@ -759,7 +859,7 @@ def agenda():
         st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
         st.text_area("Mensagem", "Ola, temos um comunicado da Casa Lar sobre a proxima atividade.")
         st.button("Simular envio por WhatsApp")
-        st.info("Na versao real, podemos integrar WhatsApp Cloud API, Twilio, Z-API ou outro provedor.")
+        st.info("Na versão real, podemos integrar WhatsApp Cloud API, Twilio, Z-API ou outro provedor.")
 
 
 def futebol(perfil, professor):
@@ -800,31 +900,33 @@ def futebol(perfil, professor):
 
 
 def gestao_matriculas():
-    st.header("Gestao de matriculas")
+    st.header("Gestão de matrícula")
     subpagina = botoes_submenu("Gestao de matriculas")
 
     if subpagina == "Inscricoes":
-        tabela_fechada("Inscricoes recebidas", ALUNOS)
+        tabela_fechada("Inscrições recebidas", ALUNOS)
+    elif subpagina == "Cadastro":
+        formulario_cadastro_aluno("cadastro_aluno_matriculas")
     elif subpagina == "Incluir em turma":
         aluno = st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
         turma = st.selectbox("Turma", [item["turma"] for item in TURMAS])
         if st.button("Incluir aluno na turma"):
-            st.success(f"{aluno} incluido em {turma} para demonstracao.")
+            st.success(f"{aluno} incluído em {turma} para demonstração.")
     elif subpagina == "Pendencias":
-        tabela_fechada("Pendencias de matricula", [item for item in ALUNOS if item["status"] == "Pendente"])
+        tabela_fechada("Pendências de matrícula", [item for item in ALUNOS if item["status"] == "Pendente"])
 
 
 def digitalizacao():
-    st.header("Digitalizacao")
+    st.header("Digitalização")
     subpagina = botoes_submenu("Digitalizacao")
 
     if subpagina == "Enviar ficha":
         st.file_uploader("Enviar ficha digitalizada", type=["pdf", "png", "jpg", "jpeg"])
-        st.info("Nesta versao, o envio e demonstrativo. Depois podemos incluir OCR.")
+        st.info("Nesta versão, o envio é demonstrativo. Depois podemos incluir OCR.")
     elif subpagina == "Revisar dados":
-        tabela_fechada("Fichas para revisao", FICHAS)
+        tabela_fechada("Fichas para revisão", FICHAS)
         st.text_input("Nome revisado")
-        st.text_input("Responsavel revisado")
+        st.text_input("Responsável revisado")
     elif subpagina == "Aprovar cadastro":
         ficha = st.selectbox("Ficha para aprovar", [item["arquivo"] for item in FICHAS])
         if st.button("Aprovar ficha de teste"):
@@ -844,7 +946,7 @@ def usuarios():
             usuarios_filtrados = [
                 usuario for usuario in usuarios_filtrados if termo in str(usuario).lower()
             ]
-        st.dataframe(usuarios_filtrados, use_container_width=True, hide_index=True)
+        st.dataframe(dados_para_exibicao(usuarios_filtrados), use_container_width=True, hide_index=True)
 
     elif subpagina == "Cadastrar":
         with st.form("form_cadastrar_usuario"):
@@ -928,15 +1030,18 @@ def usuarios():
         atual = next(usuario for usuario in st.session_state.usuarios if usuario["id"] == usuario_id)
         st.warning(f"Esta ação removerá {atual['nome']} da lista desta sessão de teste.")
         confirmar = st.checkbox("Confirmo a exclusão deste usuário")
-        if st.button("Excluir usuário", disabled=not confirmar):
-            st.session_state.usuarios = [
-                usuario for usuario in st.session_state.usuarios if usuario["id"] != usuario_id
-            ]
-            st.success("Usuário excluído da sessão de teste.")
+        if confirmar:
+            if st.button("Excluir usuário"):
+                st.session_state.usuarios = [
+                    usuario for usuario in st.session_state.usuarios if usuario["id"] != usuario_id
+                ]
+                st.success("Usuário excluído da sessão de teste.")
+        else:
+            st.info("Marque a confirmação para liberar o botão de exclusão.")
 
 
 def dashboard():
-    st.header("Dashboard da direcao")
+    st.header("Dashboard da direção")
     subpagina = botoes_submenu("Dashboard")
 
     if subpagina == "Indicadores":
@@ -947,7 +1052,7 @@ def dashboard():
             status[aluno["status"]] = status.get(aluno["status"], 0) + 1
         st.bar_chart(status)
     elif subpagina == "Oficinas":
-        st.subheader("Matriculas por turma")
+        st.subheader("Matrículas por turma")
         st.bar_chart({turma["turma"]: turma["matriculados"] for turma in TURMAS})
         tabela_fechada("Dados das oficinas", TURMAS)
     elif subpagina == "Esportivo":
