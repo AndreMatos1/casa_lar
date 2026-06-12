@@ -179,6 +179,8 @@ USUARIOS_INICIAIS = [
     {
         "id": "USR-001",
         "nome": "Camila Rocha",
+        "usuario": "camila.rocha",
+        "senha": "123456",
         "email": "camila.rocha@casalar.org",
         "perfil": "Professor",
         "status": "Ativo",
@@ -187,6 +189,8 @@ USUARIOS_INICIAIS = [
     {
         "id": "USR-002",
         "nome": "Diego Martins",
+        "usuario": "diego.martins",
+        "senha": "123456",
         "email": "diego.martins@casalar.org",
         "perfil": "Professor",
         "status": "Ativo",
@@ -195,6 +199,8 @@ USUARIOS_INICIAIS = [
     {
         "id": "USR-003",
         "nome": "Mariana Alves",
+        "usuario": "mariana.alves",
+        "senha": "123456",
         "email": "mariana.alves@casalar.org",
         "perfil": "Gestor",
         "status": "Ativo",
@@ -203,10 +209,22 @@ USUARIOS_INICIAIS = [
     {
         "id": "USR-004",
         "nome": "Irene Costa",
+        "usuario": "irene.costa",
+        "senha": "123456",
         "email": "irene.costa@casalar.org",
         "perfil": "Diretor",
         "status": "Ativo",
         "vinculo": "Diretoria",
+    },
+    {
+        "id": "USR-005",
+        "nome": "Andre Matos",
+        "usuario": "andre.matos",
+        "senha": "507@Dias",
+        "email": "andre.matos@casalar.org",
+        "perfil": "Gestor",
+        "status": "Ativo",
+        "vinculo": "Demonstração",
     },
 ]
 
@@ -304,6 +322,7 @@ COLUNAS_EXIBICAO = {
     "confianca": "Confiança",
     "aluno": "Aluno",
     "observacao": "Observação",
+    "usuario": "Usuário",
     "email": "E-mail",
     "perfil": "Perfil",
     "vinculo": "Vínculo",
@@ -393,6 +412,27 @@ def aplicar_estilo():
         }
         section[data-testid="stSidebar"] label[data-baseweb="radio"] > div:first-child {
             display: none;
+        }
+        .login-panel {
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 22px 24px;
+            border: 1px solid #d9e2ec;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+        }
+        .login-title {
+            text-align: center;
+            color: #0f172a;
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .login-subtitle {
+            text-align: center;
+            color: #667085;
+            margin-bottom: 18px;
         }
         a.nav-link, a.side-nav-link {
             display: flex;
@@ -532,6 +572,67 @@ def exibir_logo_inicio():
         center.image(str(LOGO_PATH), width=360)
 
 
+def exibir_logo_login():
+    if LOGO_PATH.exists():
+        left, center, right = st.columns([1.2, 1, 1.2])
+        center.image(str(LOGO_PATH), width=210)
+
+
+def usuario_para_login(valor):
+    return (valor or "").strip().lower()
+
+
+def autenticar_usuario(usuario, senha):
+    usuario_normalizado = usuario_para_login(usuario)
+    for item in st.session_state.usuarios:
+        login = usuario_para_login(item.get("usuario") or item.get("email"))
+        email = usuario_para_login(item.get("email"))
+        if usuario_normalizado in {login, email} and senha == item.get("senha") and item["status"] == "Ativo":
+            return item
+    return None
+
+
+def entrar(usuario):
+    st.session_state.usuario_logado = usuario.copy()
+    st.session_state.pagina = MENU_POR_PERFIL[usuario["perfil"]][0]
+    for chave in ["page", "sub", "turma", "aluno"]:
+        if chave in st.query_params:
+            del st.query_params[chave]
+
+
+def sair():
+    for chave in ["usuario_logado", "pagina", "turma_selecionada", "aluno_selecionado"]:
+        if chave in st.session_state:
+            del st.session_state[chave]
+    for chave in ["page", "sub", "turma", "aluno"]:
+        if chave in st.query_params:
+            del st.query_params[chave]
+
+
+def tela_login():
+    exibir_logo_login()
+    st.markdown(
+        """
+        <div class="login-panel">
+            <div class="login-title">Acesso Casa Lar</div>
+            <div class="login-subtitle">Entre com seu usuário para abrir o menu do seu perfil.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    with st.form("login"):
+        usuario = st.text_input("Usuário", placeholder="andre.matos")
+        senha = st.text_input("Senha", type="password", placeholder="507@Dias")
+        acessar = st.form_submit_button("Entrar")
+
+    if acessar:
+        usuario_encontrado = autenticar_usuario(usuario, senha)
+        if usuario_encontrado:
+            entrar(usuario_encontrado)
+            st.rerun()
+        st.error("Usuário ou senha inválidos, ou usuário inativo.")
+
+
 def navegar_para(pagina, subpagina=None, turma=None):
     st.session_state.pagina = pagina
     st.query_params["page"] = pagina
@@ -602,6 +703,12 @@ def selecionar_pagina(perfil):
         st.session_state.pagina = paginas[0]
 
     st.sidebar.title("Casa Lar")
+    usuario = st.session_state.get("usuario_logado", {})
+    st.sidebar.caption(f"{usuario.get('nome', '')} | {perfil}")
+    if st.sidebar.button("Sair", key="logout", use_container_width=True):
+        sair()
+        st.rerun()
+    st.sidebar.divider()
     st.sidebar.caption("Menu por perfil")
     with st.sidebar:
         for pagina in paginas:
@@ -704,6 +811,15 @@ def lista_alunos_com_acesso(titulo, alunos):
 def inicializar_usuarios():
     if "usuarios" not in st.session_state:
         st.session_state.usuarios = [usuario.copy() for usuario in USUARIOS_INICIAIS]
+    for usuario in st.session_state.usuarios:
+        usuario.setdefault("usuario", usuario_para_login(usuario.get("email", "").split("@")[0]))
+        usuario.setdefault("senha", "123456")
+    if not any(usuario.get("usuario") == "andre.matos" for usuario in st.session_state.usuarios):
+        st.session_state.usuarios.append(USUARIOS_INICIAIS[-1].copy())
+
+
+def usuarios_para_exibicao(usuarios):
+    return [{chave: valor for chave, valor in usuario.items() if chave != "senha"} for usuario in usuarios]
 
 
 def proximo_id_usuario():
@@ -1178,26 +1294,38 @@ def usuarios():
             usuarios_filtrados = [
                 usuario for usuario in usuarios_filtrados if termo in str(usuario).lower()
             ]
-        st.dataframe(dados_para_exibicao(usuarios_filtrados), use_container_width=True, hide_index=True)
+        st.dataframe(
+            dados_para_exibicao(usuarios_para_exibicao(usuarios_filtrados)),
+            use_container_width=True,
+            hide_index=True,
+        )
 
     elif subpagina == "Cadastrar":
         with st.form("form_cadastrar_usuario"):
             col1, col2 = st.columns(2)
             nome = col1.text_input("Nome")
-            email = col2.text_input("E-mail")
+            usuario_login = col2.text_input("Usuário", placeholder="Ex.: nome.sobrenome")
+            email = col1.text_input("E-mail")
+            senha_temp = col2.text_input("Senha temporária", type="password")
             perfil_usuario = col1.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
             status_usuario = col2.selectbox("Status", ["Ativo", "Inativo"])
             vinculo = st.text_input("Vínculo ou área", placeholder="Ex.: Futebol, Ballet, Secretaria")
-            senha_temp = st.text_input("Senha temporária", type="password")
             salvar = st.form_submit_button("Cadastrar usuário")
         if salvar:
-            if not nome or not email:
-                st.error("Informe nome e e-mail para cadastrar o usuário.")
+            if not nome or not usuario_login or not senha_temp:
+                st.error("Informe nome, usuário e senha temporária para cadastrar o usuário.")
+            elif any(
+                usuario_para_login(usuario.get("usuario")) == usuario_para_login(usuario_login)
+                for usuario in st.session_state.usuarios
+            ):
+                st.error("Já existe um usuário com este login.")
             else:
                 st.session_state.usuarios.append(
                     {
                         "id": proximo_id_usuario(),
                         "nome": nome,
+                        "usuario": usuario_para_login(usuario_login),
+                        "senha": senha_temp,
                         "email": email,
                         "perfil": perfil_usuario,
                         "status": status_usuario,
@@ -1205,8 +1333,6 @@ def usuarios():
                     }
                 )
                 st.success(f"Usuário {nome} cadastrado para teste.")
-                if senha_temp:
-                    st.caption("Senha temporária registrada apenas como simulação visual do fluxo.")
 
     elif subpagina == "Editar":
         if not st.session_state.usuarios:
@@ -1223,7 +1349,9 @@ def usuarios():
         with st.form("form_editar_usuario"):
             col1, col2 = st.columns(2)
             nome = col1.text_input("Nome", value=atual["nome"])
-            email = col2.text_input("E-mail", value=atual["email"])
+            usuario_login = col2.text_input("Usuário", value=atual.get("usuario", ""))
+            email = col1.text_input("E-mail", value=atual["email"])
+            nova_senha = col2.text_input("Nova senha", type="password", placeholder="Manter senha atual")
             perfil_usuario = col1.selectbox(
                 "Perfil",
                 ["Professor", "Gestor", "Diretor"],
@@ -1240,12 +1368,17 @@ def usuarios():
             atual.update(
                 {
                     "nome": nome,
+                    "usuario": usuario_para_login(usuario_login),
                     "email": email,
                     "perfil": perfil_usuario,
                     "status": status_usuario,
                     "vinculo": vinculo,
                 }
             )
+            if nova_senha:
+                atual["senha"] = nova_senha
+            if st.session_state.get("usuario_logado", {}).get("id") == atual["id"]:
+                st.session_state.usuario_logado = atual.copy()
             st.success("Usuário atualizado para teste.")
 
     elif subpagina == "Excluir":
@@ -1294,10 +1427,17 @@ def dashboard():
 
 aplicar_estilo()
 inicializar_usuarios()
+if "usuario_logado" not in st.session_state:
+    tela_login()
+    st.stop()
+
 exibir_logo_sidebar()
-perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
+usuario_logado = st.session_state.usuario_logado
+perfil = usuario_logado["perfil"]
 professores = sorted({turma["professor"] for turma in TURMAS})
-professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
+professor = ""
+if perfil == "Professor":
+    professor = usuario_logado["nome"] if usuario_logado["nome"] in professores else professores[0]
 aplicar_query_params(perfil)
 pagina = selecionar_pagina(perfil)
 
