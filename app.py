@@ -643,8 +643,8 @@ def tela_login():
             unsafe_allow_html=True,
         )
         with st.form("login"):
-            usuario = st.text_input("Usuário", placeholder="andre.matos")
-            senha = st.text_input("Senha", type="password", placeholder="507@Dias")
+            usuario = st.text_input("Usuário", placeholder="Seu usuário")
+            senha = st.text_input("Senha", type="password", placeholder="Sua senha")
             with st.expander("Esqueci minha senha", expanded=False):
                 st.caption("Neste protótipo, solicite a redefinição para um gestor do sistema.")
             acessar = st.form_submit_button("Entrar", use_container_width=True)
