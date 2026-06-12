@@ -1,4 +1,5 @@
 from datetime import date
+from urllib.parse import urlencode
 
 import streamlit as st
 
@@ -274,6 +275,38 @@ def aplicar_estilo():
         section[data-testid="stSidebar"] label[data-baseweb="radio"] > div:first-child {
             display: none;
         }
+        a.nav-link, a.side-nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid #cfd8e3;
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+            color: #1d2733 !important;
+            font-weight: 700;
+            text-decoration: none !important;
+            padding: 0.62rem 0.9rem;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        a.side-nav-link {
+            justify-content: flex-start;
+            min-height: 46px;
+        }
+        a.nav-link:hover, a.side-nav-link:hover {
+            border-color: #2563eb;
+            color: #1746a2 !important;
+            background: #edf4ff;
+        }
+        a.nav-link.active, a.side-nav-link.active {
+            border-color: #1d4ed8;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.24);
+        }
         .card {
             border: 1px solid #d9e2ec;
             border-radius: 14px;
@@ -307,6 +340,46 @@ def navegar_para(pagina, subpagina=None, turma=None):
         st.session_state.turma_selecionada = turma
 
 
+def destino_url(pagina, subpagina=None, turma=None):
+    params = {"page": pagina}
+    if subpagina:
+        params["sub"] = subpagina
+    if turma:
+        params["turma"] = turma
+    return "?" + urlencode(params)
+
+
+def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False):
+    classe = "side-nav-link" if sidebar else "nav-link"
+    if active:
+        classe += " active"
+    html = f'<a class="{classe}" href="{destino_url(pagina, subpagina, turma)}">{label}</a>'
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def aplicar_query_params(perfil):
+    params = st.query_params
+    pagina = params.get("page")
+    subpagina = params.get("sub")
+    turma = params.get("turma")
+    paginas = MENU_POR_PERFIL[perfil]
+
+    if pagina in paginas:
+        st.session_state.pagina = pagina
+    elif "pagina" not in st.session_state or st.session_state.pagina not in paginas:
+        st.session_state.pagina = paginas[0]
+
+    pagina_atual = st.session_state.pagina
+    opcoes = SUBMENUS.get(pagina_atual, ["Principal"])
+    if subpagina in opcoes:
+        st.session_state[f"subpagina_{pagina_atual}"] = subpagina
+    elif f"subpagina_{pagina_atual}" not in st.session_state:
+        st.session_state[f"subpagina_{pagina_atual}"] = opcoes[0]
+
+    if turma:
+        st.session_state.turma_selecionada = turma
+
+
 def selecionar_pagina(perfil):
     paginas = MENU_POR_PERFIL[perfil]
     if "pagina" not in st.session_state or st.session_state.pagina not in paginas:
@@ -314,15 +387,15 @@ def selecionar_pagina(perfil):
 
     st.sidebar.title("Casa Lar")
     st.sidebar.caption("Menu por perfil")
-    selecionada = st.sidebar.radio(
-        "Navegacao principal",
-        paginas,
-        index=paginas.index(st.session_state.pagina),
-        key=f"menu_lateral_{perfil}",
-        label_visibility="collapsed",
-    )
-    if selecionada != st.session_state.pagina:
-        navegar_para(selecionada, SUBMENUS.get(selecionada, ["Principal"])[0])
+    with st.sidebar:
+        for pagina in paginas:
+            nav_link(
+                pagina,
+                pagina,
+                SUBMENUS.get(pagina, ["Principal"])[0],
+                active=pagina == st.session_state.pagina,
+                sidebar=True,
+            )
 
     st.sidebar.divider()
     st.sidebar.caption(f"Perfil ativo: {perfil}")
@@ -337,10 +410,8 @@ def botoes_submenu(pagina):
 
     cols = st.columns(len(opcoes))
     for col, opcao in zip(cols, opcoes):
-        ativo = opcao == st.session_state[chave]
-        label = f"> {opcao}" if ativo else opcao
-        if col.button(label, key=f"{pagina}_{opcao}", use_container_width=True, disabled=ativo):
-            st.session_state[chave] = opcao
+        with col:
+            nav_link(opcao, pagina, opcao, active=opcao == st.session_state[chave])
 
     return st.session_state[chave]
 
@@ -385,9 +456,7 @@ def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas"):
         """,
         unsafe_allow_html=True,
     )
-    if st.button(f"Abrir {turma['turma']}", key=f"abrir_{destino}_{subpagina}_{turma['turma']}"):
-        navegar_para(destino, subpagina, turma["turma"])
-        st.rerun()
+    nav_link(f"Abrir {turma['turma']}", destino, subpagina, turma["turma"])
 
 
 def agenda_semanal(turmas, destino="Oficinas"):
@@ -403,13 +472,13 @@ def agenda_semanal(turmas, destino="Oficinas"):
         if not eventos:
             col.caption("Sem atividades")
         for turma in eventos:
-            if col.button(
-                f"{turma['horario']} | {turma['turma']}",
-                key=f"agenda_{destino}_{dia}_{turma['turma']}",
-                use_container_width=True,
-            ):
-                navegar_para(destino, "Minhas turmas" if destino == "Oficinas" else "Turmas", turma["turma"])
-                st.rerun()
+            with col:
+                nav_link(
+                    f"{turma['horario']} | {turma['turma']}",
+                    destino,
+                    "Minhas turmas" if destino == "Oficinas" else "Turmas",
+                    turma["turma"],
+                )
 
 
 def chamada_turma(turma_nome):
@@ -442,16 +511,15 @@ def inicio(perfil, professor):
     atalhos = st.multiselect("Editar atalhos da tela inicial", atalhos_padrao, default=atalhos_padrao)
     cols = st.columns(max(len(atalhos), 1))
     for col, atalho in zip(cols, atalhos):
-        if col.button(atalho, key=f"atalho_{atalho}", use_container_width=True):
+        with col:
             if atalho == "Turmas":
-                navegar_para("Oficinas", "Minhas turmas")
+                nav_link(atalho, "Oficinas", "Minhas turmas")
             elif atalho == "Futebol":
-                navegar_para("Futebol", "Turmas")
+                nav_link(atalho, "Futebol", "Turmas")
             elif atalho == "Meus alunos":
-                navegar_para("Alunos", "Meus alunos")
+                nav_link(atalho, "Alunos", "Meus alunos")
             elif atalho == "Chamada":
-                navegar_para("Oficinas", "Chamada")
-            st.rerun()
+                nav_link(atalho, "Oficinas", "Chamada")
 
     turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
     agenda_semanal(turmas)
@@ -486,9 +554,8 @@ def alunos(perfil, professor):
         if filtro_status != "Todos":
             filtrados = [aluno for aluno in filtrados if aluno["status"] == filtro_status]
         tabela_fechada("Meus alunos", filtrados)
-        if filtro_turma != "Todas" and st.button("Abrir turma selecionada"):
-            navegar_para("Oficinas", "Minhas turmas", filtro_turma)
-            st.rerun()
+        if filtro_turma != "Todas":
+            nav_link("Abrir turma selecionada", "Oficinas", "Minhas turmas", filtro_turma)
 
     elif subpagina == "Cadastro":
         with st.form("cadastro_aluno"):
@@ -670,6 +737,7 @@ aplicar_estilo()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
 professores = sorted({turma["professor"] for turma in TURMAS})
 professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
+aplicar_query_params(perfil)
 pagina = selecionar_pagina(perfil)
 
 if pagina == "Inicio":
