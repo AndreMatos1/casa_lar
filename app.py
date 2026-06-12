@@ -482,17 +482,78 @@ def chamada_turma(turma_nome):
         st.info("Nenhum aluno encontrado para esta turma na base demonstrativa.")
         return
 
+    if "chamadas_salvas" not in st.session_state:
+        st.session_state.chamadas_salvas = []
+
     with st.form(f"chamada_{turma_nome}"):
-        presencas = {}
+        data_chamada = st.date_input("Data da chamada", value=date.today())
+        st.caption("Marque presente ou ausente e, se necessário, registre uma observação curta por aluno.")
+
+        header = st.columns([3, 1, 1, 3])
+        header[0].markdown("**Aluno**")
+        header[1].markdown("**Presente**")
+        header[2].markdown("**Ausente**")
+        header[3].markdown("**Observação**")
+
+        registros = []
         for aluno in alunos:
-            presencas[aluno["nome"]] = st.checkbox(aluno["nome"], value=True)
-        observacoes = st.text_area("Observacoes da aula")
-        salvar = st.form_submit_button("Salvar chamada de teste")
+            row = st.columns([3, 1, 1, 3])
+            row[0].write(aluno["nome"])
+            presente = row[1].checkbox(
+                "Presente",
+                value=True,
+                key=f"presente_{turma_nome}_{aluno['id']}",
+                label_visibility="collapsed",
+            )
+            ausente = row[2].checkbox(
+                "Ausente",
+                value=False,
+                key=f"ausente_{turma_nome}_{aluno['id']}",
+                label_visibility="collapsed",
+            )
+            observacao = row[3].text_input(
+                "Observação",
+                key=f"obs_{turma_nome}_{aluno['id']}",
+                label_visibility="collapsed",
+                placeholder="Ex.: chegou atrasado",
+            )
+
+            if presente and ausente:
+                status = "Conferir"
+            elif ausente:
+                status = "Ausente"
+            else:
+                status = "Presente"
+
+            registros.append(
+                {
+                    "data": data_chamada.isoformat(),
+                    "turma": turma_nome,
+                    "aluno": aluno["nome"],
+                    "status": status,
+                    "observacao": observacao,
+                }
+            )
+
+        salvar = st.form_submit_button("Salvar chamada")
+
     if salvar:
-        presentes = len([valor for valor in presencas.values() if valor])
-        st.success(f"Chamada registrada: {presentes} presente(s), {len(alunos) - presentes} falta(s).")
-        if observacoes:
-            st.caption(f"Observacoes: {observacoes}")
+        conflitos = [registro for registro in registros if registro["status"] == "Conferir"]
+        if conflitos:
+            st.error("Revise a chamada: alguns alunos estão marcados como presente e ausente ao mesmo tempo.")
+        else:
+            st.session_state.chamadas_salvas.extend(registros)
+            presentes = len([registro for registro in registros if registro["status"] == "Presente"])
+            ausentes = len([registro for registro in registros if registro["status"] == "Ausente"])
+            st.success(f"Chamada salva: {presentes} presente(s), {ausentes} ausente(s).")
+
+    historico = [
+        registro
+        for registro in st.session_state.get("chamadas_salvas", [])
+        if registro["turma"] == turma_nome
+    ]
+    if historico:
+        tabela_fechada("Histórico de chamadas desta turma", historico)
 
 
 def inicio(perfil, professor):
