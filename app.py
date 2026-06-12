@@ -141,16 +141,22 @@ TURMAS = [
 JOGOS = [
     {
         "categoria": "Sub-12",
+        "turma": "Sub-12 Futebol",
         "competicao": "Liga Amistosa Regional",
         "data": "2026-06-20",
+        "horario": "09:00",
+        "local": "Campo Principal",
         "adversario": "Projeto Esperanca",
         "status": "Agendado",
         "placar": "-",
     },
     {
         "categoria": "Sub-14",
+        "turma": "Sub-14 Futebol",
         "competicao": "Copa Solidariedade",
         "data": "2026-06-08",
+        "horario": "15:00",
+        "local": "Campo Principal",
         "adversario": "Escola Vida",
         "status": "Finalizado",
         "placar": "3 x 1",
@@ -444,6 +450,28 @@ def aplicar_estilo():
             background: #d0d5dd;
             margin: 0 0 28px 0;
         }
+        .grid-caption {
+            color: #475467;
+            font-size: 0.92rem;
+            margin: 0.25rem 0 0.75rem 0;
+        }
+        .table-header {
+            border: 1px solid #d9e2ec;
+            border-radius: 12px 12px 0 0;
+            background: #f8fafc;
+            padding: 10px 12px;
+            font-weight: 800;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.student-grid-row) {
+            border-color: #d9e2ec;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .student-grid-row {
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+        }
         a.nav-link, a.side-nav-link {
             display: flex;
             align-items: center;
@@ -659,28 +687,16 @@ def tela_login():
 
 def navegar_para(pagina, subpagina=None, turma=None):
     st.session_state.pagina = pagina
-    st.query_params["page"] = pagina
     if subpagina:
         st.session_state[f"subpagina_{pagina}"] = subpagina
-        st.query_params["sub"] = subpagina
-    elif "sub" in st.query_params:
-        del st.query_params["sub"]
     if turma:
         st.session_state.turma_selecionada = turma
-        st.query_params["turma"] = turma
-    elif "turma" in st.query_params:
-        del st.query_params["turma"]
-    if "aluno" in st.query_params:
-        del st.query_params["aluno"]
 
 
 def abrir_cadastro_aluno(aluno_id):
     st.session_state.pagina = "Alunos"
     st.session_state.subpagina_Alunos = "Cadastro"
     st.session_state.aluno_selecionado = aluno_id
-    st.query_params["page"] = "Alunos"
-    st.query_params["sub"] = "Cadastro"
-    st.query_params["aluno"] = aluno_id
 
 
 def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False, key_suffix=""):
@@ -810,26 +826,34 @@ def lista_alunos_com_acesso(titulo, alunos):
         st.info("Nenhum aluno encontrado.")
         return
 
-    cabecalho = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
-    cabecalho[0].markdown("**Aluno**")
-    cabecalho[1].markdown("**Turma**")
-    cabecalho[2].markdown("**Status**")
-    cabecalho[3].markdown("**Pendência**")
-    cabecalho[4].markdown("**Cadastro**")
+    with st.container(border=True):
+        cabecalho = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
+        cabecalho[0].markdown("**Aluno**")
+        cabecalho[1].markdown("**Turma**")
+        cabecalho[2].markdown("**Status**")
+        cabecalho[3].markdown("**Pendência**")
+        cabecalho[4].markdown("**Cadastro**")
 
-    for aluno in alunos:
-        linha = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
-        linha[0].write(aluno["nome"])
-        linha[1].write(aluno["turma"])
-        linha[2].write(status_cadastro_aluno(aluno))
-        linha[3].write(pendencia_aluno(aluno))
-        linha[4].button(
-            "Abrir cadastro",
-            key=f"abrir_cadastro_{titulo}_{aluno['id']}",
-            use_container_width=True,
-            on_click=abrir_cadastro_aluno,
-            args=(aluno["id"],),
-        )
+    for indice, aluno in enumerate(alunos):
+        with st.container(border=True):
+            linha = st.columns([2.4, 1.6, 1.3, 2.2, 1.4])
+            linha[0].markdown(f"<div class='student-grid-row'>{escape(aluno['nome'])}</div>", unsafe_allow_html=True)
+            linha[1].markdown(f"<div class='student-grid-row'>{escape(aluno['turma'])}</div>", unsafe_allow_html=True)
+            linha[2].markdown(
+                f"<div class='student-grid-row'>{escape(status_cadastro_aluno(aluno))}</div>",
+                unsafe_allow_html=True,
+            )
+            linha[3].markdown(
+                f"<div class='student-grid-row'>{escape(pendencia_aluno(aluno))}</div>",
+                unsafe_allow_html=True,
+            )
+            linha[4].button(
+                "Abrir cadastro",
+                key=f"abrir_cadastro_{titulo}_{aluno['id']}_{indice}",
+                use_container_width=True,
+                on_click=abrir_cadastro_aluno,
+                args=(aluno["id"],),
+            )
 
 
 def inicializar_usuarios():
@@ -840,6 +864,11 @@ def inicializar_usuarios():
         usuario.setdefault("senha", "123456")
     if not any(usuario.get("usuario") == "andre.matos" for usuario in st.session_state.usuarios):
         st.session_state.usuarios.append(USUARIOS_INICIAIS[-1].copy())
+
+
+def inicializar_jogos():
+    if "jogos" not in st.session_state:
+        st.session_state.jogos = [jogo.copy() for jogo in JOGOS]
 
 
 def usuarios_para_exibicao(usuarios):
@@ -866,6 +895,71 @@ def turmas_do_professor(professor):
 
 def alunos_do_professor(professor):
     return [aluno for aluno in ALUNOS if aluno["professor"] == professor]
+
+
+def jogos_salvos():
+    return st.session_state.get("jogos", JOGOS)
+
+
+def jogos_para_tabela():
+    return jogos_salvos()
+
+
+def pdf_escape(texto):
+    return str(texto).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def gerar_pdf_convocacao(jogo, turma, convocados):
+    linhas = [
+        "Casa Lar - Associação Irmã Carmen",
+        "Convocação de Jogadores",
+        "",
+        f"Turma: {turma['turma']}",
+        f"Categoria: {jogo['categoria']}",
+        f"Competição: {jogo['competicao']}",
+        f"Adversário: {jogo['adversario']}",
+        f"Data: {formatar_data_br(jogo['data'])}",
+        f"Horário: {jogo.get('horario', '-')}",
+        f"Local: {jogo.get('local', '-')}",
+        "",
+        "Jogadores convocados:",
+    ]
+    linhas.extend([f"- {aluno}" for aluno in convocados])
+    if not convocados:
+        linhas.append("- Nenhum jogador selecionado")
+
+    comandos = ["BT", "/F1 12 Tf", "50 790 Td", "16 TL"]
+    for linha in linhas:
+        comandos.append(f"({pdf_escape(linha)}) Tj")
+        comandos.append("T*")
+    comandos.append("ET")
+    conteudo = "\n".join(comandos).encode("latin-1", "replace")
+
+    objetos = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length " + str(len(conteudo)).encode("ascii") + b" >>\nstream\n" + conteudo + b"\nendstream",
+    ]
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for indice, objeto in enumerate(objetos, start=1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{indice} 0 obj\n".encode("ascii"))
+        pdf.extend(objeto)
+        pdf.extend(b"\nendobj\n")
+    inicio_xref = len(pdf)
+    pdf.extend(f"xref\n0 {len(objetos) + 1}\n".encode("ascii"))
+    pdf.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    pdf.extend(
+        f"trailer\n<< /Size {len(objetos) + 1} /Root 1 0 R >>\nstartxref\n{inicio_xref}\n%%EOF".encode(
+            "ascii"
+        )
+    )
+    return bytes(pdf)
 
 
 def formulario_cadastro_aluno(form_key="cadastro_aluno", aluno=None):
@@ -928,7 +1022,7 @@ def metricas():
     col1.metric("Alunos ativos", ativos)
     col2.metric("Cadastros pendentes", pendentes)
     col3.metric("Turmas", len(TURMAS))
-    col4.metric("Jogos", len(JOGOS))
+    col4.metric("Jogos", len(jogos_salvos()))
 
 
 def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=""):
@@ -1188,7 +1282,7 @@ def agenda():
     if subpagina == "Aulas":
         agenda_semanal(TURMAS)
     elif subpagina == "Jogos":
-        tabela_fechada("Agenda de jogos", JOGOS)
+        tabela_fechada("Agenda de jogos", jogos_para_tabela())
     elif subpagina == "Treinos":
         treinos = [turma for turma in TURMAS if turma["modalidade"] == "Futebol"]
         agenda_semanal(treinos, "Futebol")
@@ -1205,23 +1299,120 @@ def futebol(perfil, professor):
     futebol_turmas = [item for item in TURMAS if item["modalidade"] == "Futebol"]
     if perfil == "Professor":
         futebol_turmas = [item for item in futebol_turmas if item["professor"] == professor]
+    if not futebol_turmas:
+        st.info("Nenhuma turma de futebol disponível para este perfil.")
+        return
 
     if subpagina == "Turmas":
         cols = st.columns(2)
         for index, turma in enumerate(futebol_turmas):
             with cols[index % 2]:
                 card_turma(turma, "Futebol", "Turmas", key_suffix=f"futebol_{index}")
+        selecionada = st.session_state.get(
+            "turma_selecionada",
+            futebol_turmas[0]["turma"] if futebol_turmas else "",
+        )
+        if selecionada:
+            turma = next((item for item in futebol_turmas if item["turma"] == selecionada), None)
+            if turma:
+                st.divider()
+                st.subheader(f"Detalhes da turma: {selecionada}")
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Vagas", turma["vagas"])
+                col2.metric("Matriculados", turma["matriculados"])
+                col3.metric("Alunos na amostra", len(alunos_por_turma(selecionada)))
+                lista_alunos_com_acesso("Jogadores da turma", alunos_por_turma(selecionada))
 
     elif subpagina == "Agenda jogo":
-        tabela_fechada("Agenda de jogos", JOGOS)
+        aba_agenda, aba_novo, aba_convocar = st.tabs(
+            ["Agenda de jogos", "Novo agendamento", "Convocar jogadores"]
+        )
+        with aba_agenda:
+            tabela_fechada("Jogos cadastrados", jogos_para_tabela())
+
+        with aba_novo:
+            with st.form("novo_jogo"):
+                col1, col2 = st.columns(2)
+                turma_nome = col1.selectbox("Turma", [turma["turma"] for turma in futebol_turmas])
+                data_jogo = col2.date_input("Data do jogo", value=date.today(), format="DD/MM/YYYY")
+                horario = col1.text_input("Horário", placeholder="Ex.: 09:00")
+                local = col2.text_input("Local", placeholder="Ex.: Campo Principal")
+                competicao = col1.text_input("Competição")
+                adversario = col2.text_input("Adversário")
+                salvar = st.form_submit_button("Salvar agendamento")
+            if salvar:
+                if not competicao or not adversario or not horario:
+                    st.error("Informe competição, adversário e horário.")
+                else:
+                    st.session_state.jogos.append(
+                        {
+                            "categoria": turma_nome.replace(" Futebol", ""),
+                            "turma": turma_nome,
+                            "competicao": competicao,
+                            "data": data_jogo.isoformat(),
+                            "horario": horario,
+                            "local": local or "A definir",
+                            "adversario": adversario,
+                            "status": "Agendado",
+                            "placar": "-",
+                        }
+                    )
+                    st.success("Agendamento incluído para demonstração.")
+
+        with aba_convocar:
+            jogos_agendados = [jogo for jogo in jogos_salvos() if jogo["status"] == "Agendado"]
+            if not jogos_agendados:
+                st.info("Nenhum jogo agendado disponível para convocação.")
+            else:
+                jogo_index = st.selectbox(
+                    "Jogo",
+                    range(len(jogos_agendados)),
+                    format_func=lambda indice: (
+                        f"{formatar_data_br(jogos_agendados[indice]['data'])} | "
+                        f"{jogos_agendados[indice].get('horario', '-')} | "
+                        f"{jogos_agendados[indice]['turma']} x {jogos_agendados[indice]['adversario']}"
+                    ),
+                )
+                jogo = jogos_agendados[jogo_index]
+                turma = next((item for item in futebol_turmas if item["turma"] == jogo["turma"]), None)
+                if not turma:
+                    st.warning("Turma do jogo não encontrada para este perfil.")
+                else:
+                    alunos = alunos_por_turma(turma["turma"])
+                    st.caption("Marque os jogadores convocados para gerar o PDF.")
+                    cabecalho = st.columns([3, 1.2, 2])
+                    cabecalho[0].markdown("**Jogador**")
+                    cabecalho[1].markdown("**Convocar**")
+                    cabecalho[2].markdown("**Turma**")
+                    convocados = []
+                    for aluno in alunos:
+                        linha = st.columns([3, 1.2, 2])
+                        linha[0].write(aluno["nome"])
+                        convocar = linha[1].checkbox(
+                            "Convocar",
+                            value=True,
+                            key=f"convocar_{jogo['data']}_{jogo['turma']}_{aluno['id']}",
+                            label_visibility="collapsed",
+                        )
+                        linha[2].write(aluno["turma"])
+                        if convocar:
+                            convocados.append(aluno["nome"])
+                    pdf = gerar_pdf_convocacao(jogo, turma, convocados)
+                    st.download_button(
+                        "Baixar PDF da convocação",
+                        data=pdf,
+                        file_name=f"convocacao_{jogo['turma'].lower().replace(' ', '_')}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                    )
 
     elif subpagina == "Agenda treinos":
         agenda_semanal(futebol_turmas, "Futebol")
 
     elif subpagina == "Resultados":
-        tabela_fechada("Resultados", [item for item in JOGOS if item["status"] == "Finalizado"])
+        tabela_fechada("Resultados", [item for item in jogos_salvos() if item["status"] == "Finalizado"])
         st.subheader("Registrar resultado demonstrativo")
-        jogo = st.selectbox("Jogo", [f"{item['categoria']} - {item['adversario']}" for item in JOGOS])
+        jogo = st.selectbox("Jogo", [f"{item['categoria']} - {item['adversario']}" for item in jogos_salvos()])
         placar = st.text_input("Placar", placeholder="Ex.: 2 x 1")
         if st.button("Salvar resultado de teste"):
             st.success(f"Resultado {placar or '-'} registrado para {jogo}.")
@@ -1446,11 +1637,12 @@ def dashboard():
         tabela_fechada("Dados das oficinas", TURMAS)
     elif subpagina == "Esportivo":
         st.subheader("Resumo esportivo")
-        tabela_fechada("Jogos e resultados", JOGOS)
+        tabela_fechada("Jogos e resultados", jogos_para_tabela())
 
 
 aplicar_estilo()
 inicializar_usuarios()
+inicializar_jogos()
 if "usuario_logado" not in st.session_state:
     tela_login()
     st.stop()
