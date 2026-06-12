@@ -1,6 +1,7 @@
 import base64
 from datetime import date
 from html import escape
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlencode
 import streamlit as st
@@ -909,7 +910,7 @@ def pdf_escape(texto):
     return str(texto).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
-def gerar_pdf_convocacao(jogo, turma, convocados):
+def gerar_pdf_convocacao_simples(jogo, turma, convocados):
     linhas = [
         "Casa Lar - Associação Irmã Carmen",
         "Convocação de Jogadores",
@@ -960,6 +961,162 @@ def gerar_pdf_convocacao(jogo, turma, convocados):
         )
     )
     return bytes(pdf)
+
+
+def dados_atleta(nome):
+    return next((aluno for aluno in ALUNOS if aluno["nome"] == nome), {"nome": nome})
+
+
+def gerar_pdf_convocacao(jogo, turma, convocados):
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    except ImportError:
+        return gerar_pdf_convocacao_simples(jogo, turma, convocados)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=22 * mm,
+        leftMargin=22 * mm,
+        topMargin=16 * mm,
+        bottomMargin=16 * mm,
+        title="Convocação de jogadores",
+    )
+    styles = getSampleStyleSheet()
+    titulo = ParagraphStyle(
+        "TituloCasaLar",
+        parent=styles["Title"],
+        alignment=TA_CENTER,
+        fontSize=17,
+        leading=21,
+        textColor=colors.HexColor("#0f172a"),
+        spaceAfter=4,
+    )
+    subtitulo = ParagraphStyle(
+        "SubtituloCasaLar",
+        parent=styles["Normal"],
+        alignment=TA_CENTER,
+        fontSize=9,
+        leading=12,
+        textColor=colors.HexColor("#475467"),
+    )
+    secao = ParagraphStyle(
+        "SecaoCasaLar",
+        parent=styles["Heading3"],
+        fontSize=11,
+        leading=14,
+        textColor=colors.HexColor("#1746a2"),
+        spaceBefore=4,
+        spaceAfter=6,
+    )
+
+    story = []
+    if LOGO_PATH.exists():
+        story.append(Image(str(LOGO_PATH), width=58 * mm, height=42 * mm, hAlign="CENTER"))
+        story.append(Spacer(1, 4 * mm))
+
+    story.append(Paragraph("Convocação de Jogadores", titulo))
+    story.append(Paragraph("Associação Irmã Carmen Casa Lar | Departamento de Futebol", subtitulo))
+    story.append(Spacer(1, 8 * mm))
+
+    confronto = f"Casa Lar x {jogo['adversario']}"
+    resumo = Table(
+        [
+            [Paragraph("<b>Partida</b>", styles["Normal"]), Paragraph(f"<b>{confronto}</b>", styles["Normal"])],
+            ["Competição", jogo["competicao"]],
+            ["Categoria", jogo["categoria"]],
+            ["Turma", turma["turma"]],
+            ["Data", formatar_data_br(jogo["data"])],
+            ["Horário", jogo.get("horario", "-")],
+            ["Local", jogo.get("local", "-")],
+            ["Treinador", turma["professor"]],
+        ],
+        colWidths=[34 * mm, 112 * mm],
+    )
+    resumo.setStyle(
+        TableStyle(
+            [
+                ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#98a2b3")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#d0d5dd")),
+                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eff6ff")),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#101828")),
+                ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.append(resumo)
+    story.append(Spacer(1, 9 * mm))
+
+    story.append(Paragraph("Lista de convocados", secao))
+    tabela_convocados = [["#", "Atleta", "Idade", "Responsável", "Telefone"]]
+    for indice, nome in enumerate(convocados, start=1):
+        atleta = dados_atleta(nome)
+        tabela_convocados.append(
+            [
+                indice,
+                atleta.get("nome", nome),
+                atleta.get("idade", "-"),
+                atleta.get("responsavel", "-"),
+                atleta.get("telefone", "-"),
+            ]
+        )
+    if len(tabela_convocados) == 1:
+        tabela_convocados.append(["-", "Nenhum jogador selecionado", "-", "-", "-"])
+
+    tabela = Table(tabela_convocados, colWidths=[12 * mm, 48 * mm, 18 * mm, 44 * mm, 32 * mm], repeatRows=1)
+    tabela.setStyle(
+        TableStyle(
+            [
+                ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#98a2b3")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#d0d5dd")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1746a2")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("ALIGN", (0, 0), (0, -1), "CENTER"),
+                ("ALIGN", (2, 1), (2, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+            ]
+        )
+    )
+    story.append(tabela)
+    story.append(Spacer(1, 14 * mm))
+
+    assinaturas = Table(
+        [["________________________________", "________________________________"], ["Treinador", "Coordenação"]],
+        colWidths=[72 * mm, 72 * mm],
+    )
+    assinaturas.setStyle(
+        TableStyle(
+            [
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("TEXTCOLOR", (0, 1), (-1, 1), colors.HexColor("#475467")),
+                ("FONTSIZE", (0, 1), (-1, 1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
+    story.append(assinaturas)
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 def formulario_cadastro_aluno(form_key="cadastro_aluno", aluno=None):
