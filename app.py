@@ -1,6 +1,4 @@
 from datetime import date
-from urllib.parse import urlencode
-
 import streamlit as st
 
 
@@ -340,21 +338,16 @@ def navegar_para(pagina, subpagina=None, turma=None):
         st.session_state.turma_selecionada = turma
 
 
-def destino_url(pagina, subpagina=None, turma=None):
-    params = {"page": pagina}
-    if subpagina:
-        params["sub"] = subpagina
-    if turma:
-        params["turma"] = turma
-    return "?" + urlencode(params)
-
-
 def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False):
-    classe = "side-nav-link" if sidebar else "nav-link"
-    if active:
-        classe += " active"
-    html = f'<a class="{classe}" href="{destino_url(pagina, subpagina, turma)}">{label}</a>'
-    st.markdown(html, unsafe_allow_html=True)
+    key = f"nav_{'side' if sidebar else 'main'}_{label}_{pagina}_{subpagina}_{turma}"
+    st.button(
+        label,
+        key=key,
+        disabled=active,
+        use_container_width=True,
+        on_click=navegar_para,
+        args=(pagina, subpagina, turma),
+    )
 
 
 def aplicar_query_params(perfil):
@@ -737,7 +730,9 @@ aplicar_estilo()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
 professores = sorted({turma["professor"] for turma in TURMAS})
 professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
-aplicar_query_params(perfil)
+if "query_params_aplicados" not in st.session_state:
+    aplicar_query_params(perfil)
+    st.session_state.query_params_aplicados = True
 pagina = selecionar_pagina(perfil)
 
 if pagina == "Inicio":
