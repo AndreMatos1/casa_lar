@@ -339,13 +339,14 @@ def aplicar_estilo():
 
 def exibir_logo_sidebar():
     if LOGO_PATH.exists():
-        st.sidebar.image(str(LOGO_PATH), use_container_width=True)
+        left, center, right = st.sidebar.columns([1, 3, 1])
+        center.image(str(LOGO_PATH), width=130)
 
 
 def exibir_logo_inicio():
     if LOGO_PATH.exists():
         left, center, right = st.columns([1, 1, 1])
-        center.image(str(LOGO_PATH), use_container_width=True)
+        center.image(str(LOGO_PATH), width=360)
 
 
 def navegar_para(pagina, subpagina=None, turma=None):
