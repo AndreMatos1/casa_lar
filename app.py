@@ -338,8 +338,8 @@ def navegar_para(pagina, subpagina=None, turma=None):
         st.session_state.turma_selecionada = turma
 
 
-def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False):
-    key = f"nav_{'side' if sidebar else 'main'}_{label}_{pagina}_{subpagina}_{turma}"
+def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False, key_suffix=""):
+    key = f"nav_{'side' if sidebar else 'main'}_{label}_{pagina}_{subpagina}_{turma}_{key_suffix}"
     st.button(
         label,
         key=key,
@@ -436,7 +436,7 @@ def metricas():
     col4.metric("Jogos", len(JOGOS))
 
 
-def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas"):
+def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=""):
     alunos = alunos_por_turma(turma["turma"])
     ocupacao = f"{turma['matriculados']} / {turma['vagas']} vagas"
     st.markdown(
@@ -449,13 +449,13 @@ def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas"):
         """,
         unsafe_allow_html=True,
     )
-    nav_link(f"Abrir {turma['turma']}", destino, subpagina, turma["turma"])
+    nav_link(f"Abrir {turma['turma']}", destino, subpagina, turma["turma"], key_suffix=key_suffix)
 
 
 def agenda_semanal(turmas, destino="Oficinas"):
     st.subheader("Agenda semanal")
     cols = st.columns(len(DIAS_SEMANA))
-    for col, dia in zip(cols, DIAS_SEMANA):
+    for dia_index, (col, dia) in enumerate(zip(cols, DIAS_SEMANA)):
         eventos = [turma for turma in turmas if dia in turma["dias"]]
         classe = "card today-card" if dia == DIA_ATUAL_DEMO else "card"
         col.markdown(
@@ -464,13 +464,14 @@ def agenda_semanal(turmas, destino="Oficinas"):
         )
         if not eventos:
             col.caption("Sem atividades")
-        for turma in eventos:
+        for evento_index, turma in enumerate(eventos):
             with col:
                 nav_link(
                     f"{turma['horario']} | {turma['turma']}",
                     destino,
                     "Minhas turmas" if destino == "Oficinas" else "Turmas",
                     turma["turma"],
+                    key_suffix=f"agenda_{destino}_{dia_index}_{evento_index}",
                 )
 
 
@@ -548,7 +549,13 @@ def alunos(perfil, professor):
             filtrados = [aluno for aluno in filtrados if aluno["status"] == filtro_status]
         tabela_fechada("Meus alunos", filtrados)
         if filtro_turma != "Todas":
-            nav_link("Abrir turma selecionada", "Oficinas", "Minhas turmas", filtro_turma)
+            nav_link(
+                "Abrir turma selecionada",
+                "Oficinas",
+                "Minhas turmas",
+                filtro_turma,
+                key_suffix="meus_alunos",
+            )
 
     elif subpagina == "Cadastro":
         with st.form("cadastro_aluno"):
@@ -584,7 +591,7 @@ def oficinas(perfil, professor):
         cols = st.columns(2)
         for index, turma in enumerate(turmas_filtradas):
             with cols[index % 2]:
-                card_turma(turma)
+                card_turma(turma, key_suffix=f"oficinas_{index}")
 
         selecionada = st.session_state.get(
             "turma_selecionada",
@@ -648,7 +655,7 @@ def futebol(perfil, professor):
         cols = st.columns(2)
         for index, turma in enumerate(futebol_turmas):
             with cols[index % 2]:
-                card_turma(turma, "Futebol", "Turmas")
+                card_turma(turma, "Futebol", "Turmas", key_suffix=f"futebol_{index}")
 
     elif subpagina == "Agenda jogo":
         tabela_fechada("Agenda de jogos", JOGOS)
