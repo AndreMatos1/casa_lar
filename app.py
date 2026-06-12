@@ -3,7 +3,6 @@ from datetime import date
 from html import escape
 from io import BytesIO
 from pathlib import Path
-from urllib.parse import urlencode
 import streamlit as st
 
 
@@ -702,40 +701,15 @@ def abrir_cadastro_aluno(aluno_id):
 
 def nav_link(label, pagina, subpagina=None, turma=None, active=False, sidebar=False, key_suffix=""):
     key = f"nav_{'side' if sidebar else 'main'}_{label}_{pagina}_{subpagina}_{turma}_{key_suffix}"
-    st.button(
+    clicado = st.button(
         ROTULOS.get(label, label),
         key=key,
         disabled=active,
         use_container_width=True,
-        on_click=navegar_para,
-        args=(pagina, subpagina, turma),
     )
-
-
-def aplicar_query_params(perfil):
-    params = st.query_params
-    pagina = params.get("page")
-    subpagina = params.get("sub")
-    turma = params.get("turma")
-    aluno = params.get("aluno")
-    paginas = MENU_POR_PERFIL[perfil]
-
-    if pagina in paginas:
-        st.session_state.pagina = pagina
-    elif "pagina" not in st.session_state or st.session_state.pagina not in paginas:
-        st.session_state.pagina = paginas[0]
-
-    pagina_atual = st.session_state.pagina
-    opcoes = SUBMENUS.get(pagina_atual, ["Principal"])
-    if subpagina in opcoes:
-        st.session_state[f"subpagina_{pagina_atual}"] = subpagina
-    elif f"subpagina_{pagina_atual}" not in st.session_state:
-        st.session_state[f"subpagina_{pagina_atual}"] = opcoes[0]
-
-    if turma:
-        st.session_state.turma_selecionada = turma
-    if aluno:
-        st.session_state.aluno_selecionado = aluno
+    if clicado:
+        navegar_para(pagina, subpagina, turma)
+        st.rerun()
 
 
 def selecionar_pagina(perfil):
@@ -911,36 +885,70 @@ def pdf_escape(texto):
 
 
 def gerar_pdf_convocacao_simples(jogo, turma, convocados):
-    linhas = [
-        "Casa Lar - Associação Irmã Carmen",
-        "Convocação de Jogadores",
-        "",
-        f"Turma: {turma['turma']}",
-        f"Categoria: {jogo['categoria']}",
-        f"Competição: {jogo['competicao']}",
-        f"Adversário: {jogo['adversario']}",
-        f"Data: {formatar_data_br(jogo['data'])}",
-        f"Horário: {jogo.get('horario', '-')}",
-        f"Local: {jogo.get('local', '-')}",
-        "",
-        "Jogadores convocados:",
-    ]
-    linhas.extend([f"- {aluno}" for aluno in convocados])
-    if not convocados:
-        linhas.append("- Nenhum jogador selecionado")
+    def texto(x, y, valor, tamanho=10, fonte="/F1", cor="0 0 0"):
+        return f"{cor} rg BT {fonte} {tamanho} Tf {x} {y} Td ({pdf_escape(valor)}) Tj ET"
 
-    comandos = ["BT", "/F1 12 Tf", "50 790 Td", "16 TL"]
-    for linha in linhas:
-        comandos.append(f"({pdf_escape(linha)}) Tj")
-        comandos.append("T*")
-    comandos.append("ET")
+    def linha(x1, y1, x2, y2, cor="0.82 0.86 0.91", largura="0.6"):
+        return f"{cor} RG {largura} w {x1} {y1} m {x2} {y2} l S"
+
+    def retangulo(x, y, w, h, cor="0.60 0.65 0.72", largura="0.8"):
+        return f"{cor} RG {largura} w {x} {y} {w} {h} re S"
+
+    comandos = [
+        texto(214, 790, "CASA-LAR", 28, "/F2", "0.10 0.28 0.72"),
+        texto(221, 772, "Associação Irmã Carmen", 11, "/F1", "0.25 0.29 0.36"),
+        texto(196, 735, "Convocação de Jogadores", 18, "/F2", "0.06 0.09 0.16"),
+        texto(171, 718, "Departamento de Futebol | Documento demonstrativo", 9, "/F1", "0.30 0.35 0.43"),
+        linha(58, 700, 537, 700),
+        retangulo(58, 545, 479, 130),
+        texto(76, 654, f"Casa Lar x {jogo['adversario']}", 13, "/F2", "0.10 0.28 0.72"),
+        texto(76, 628, f"Competição: {jogo['competicao']}", 10),
+        texto(76, 610, f"Categoria: {jogo['categoria']}", 10),
+        texto(76, 592, f"Turma: {turma['turma']}", 10),
+        texto(76, 574, f"Treinador: {turma['professor']}", 10),
+        texto(318, 628, f"Data: {formatar_data_br(jogo['data'])}", 10),
+        texto(318, 610, f"Horário: {jogo.get('horario', '-')}", 10),
+        texto(318, 592, f"Local: {jogo.get('local', '-')}", 10),
+        texto(76, 520, "Lista de convocados", 13, "/F2", "0.10 0.28 0.72"),
+        retangulo(58, 185, 479, 315),
+        linha(58, 468, 537, 468),
+        texto(76, 477, "#", 9, "/F2"),
+        texto(112, 477, "Atleta", 9, "/F2"),
+        texto(292, 477, "Idade", 9, "/F2"),
+        texto(352, 477, "Responsável", 9, "/F2"),
+    ]
+
+    nomes = convocados or ["Nenhum jogador selecionado"]
+    y = 448
+    for indice, nome in enumerate(nomes[:14], start=1):
+        atleta = dados_atleta(nome)
+        comandos.extend(
+            [
+                texto(76, y, str(indice) if convocados else "-", 9),
+                texto(112, y, atleta.get("nome", nome), 9),
+                texto(292, y, str(atleta.get("idade", "-")), 9),
+                texto(352, y, atleta.get("responsavel", "-"), 9),
+                linha(58, y - 8, 537, y - 8, "0.90 0.92 0.95", "0.35"),
+            ]
+        )
+        y -= 20
+
+    comandos.extend(
+        [
+            linha(88, 110, 238, 110, "0.45 0.50 0.58", "0.7"),
+            linha(358, 110, 508, 110, "0.45 0.50 0.58", "0.7"),
+            texto(135, 94, "Treinador", 9, "/F1", "0.30 0.35 0.43"),
+            texto(407, 94, "Coordenação", 9, "/F1", "0.30 0.35 0.43"),
+        ]
+    )
     conteudo = "\n".join(comandos).encode("latin-1", "replace")
 
     objetos = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
         b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
         b"<< /Length " + str(len(conteudo)).encode("ascii") + b" >>\nstream\n" + conteudo + b"\nendstream",
     ]
     pdf = bytearray(b"%PDF-1.4\n")
@@ -1200,42 +1208,33 @@ def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=
 
 def agenda_semanal(turmas, destino="Oficinas"):
     st.subheader("Agenda semanal")
-    colunas_html = []
-    for dia in DIAS_SEMANA:
+    cols = st.columns(len(DIAS_SEMANA))
+    for dia_index, (col, dia) in enumerate(zip(cols, DIAS_SEMANA)):
         eventos = [turma for turma in turmas if dia in turma["dias"]]
         classe = "agenda-day today" if dia == DIA_ATUAL_DEMO else "agenda-day"
-        eventos_html = []
-        if not eventos:
-            eventos_html.append("<div class='agenda-empty'>Sem atividades</div>")
-        for turma in eventos:
-            subpagina = "Minhas turmas" if destino == "Oficinas" else "Turmas"
-            href = "?" + urlencode({"page": destino, "sub": subpagina, "turma": turma["turma"]})
-            eventos_html.append(
-                "<a class='agenda-event' href='{href}' target='_self'>"
-                "<span>{horario} | {turma}</span>"
-                "</a>".format(
-                    href=escape(href, quote=True),
-                    horario=escape(turma["horario"]),
-                    turma=escape(turma["turma"]),
+        with col:
+            st.markdown(
+                "<div class='{classe}'>"
+                "<div class='card {today_card}'><strong>{dia}</strong><br>"
+                "<span class='muted'>{rotulo}</span></div>".format(
+                    classe=classe,
+                    today_card="today-card" if dia == DIA_ATUAL_DEMO else "",
+                    dia=escape(dia),
+                    rotulo="Hoje" if dia == DIA_ATUAL_DEMO else "Semana",
+                ),
+                unsafe_allow_html=True,
+            )
+            if not eventos:
+                st.markdown("<div class='agenda-empty'>Sem atividades</div>", unsafe_allow_html=True)
+            for evento_index, turma in enumerate(eventos):
+                nav_link(
+                    f"{turma['horario']} | {turma['turma']}",
+                    destino,
+                    "Minhas turmas" if destino == "Oficinas" else "Turmas",
+                    turma["turma"],
+                    key_suffix=f"agenda_{destino}_{dia_index}_{evento_index}",
                 )
-            )
-        colunas_html.append(
-            "<div class='{classe}'>"
-            "<div class='card {today_card}'><strong>{dia}</strong><br>"
-            "<span class='muted'>{rotulo}</span></div>"
-            "{eventos}"
-            "</div>".format(
-                classe=classe,
-                today_card="today-card" if dia == DIA_ATUAL_DEMO else "",
-                dia=escape(dia),
-                rotulo="Hoje" if dia == DIA_ATUAL_DEMO else "Semana",
-                eventos="".join(eventos_html),
-            )
-        )
-    st.markdown(
-        "<div class='agenda-grid'>{}</div>".format("".join(colunas_html)),
-        unsafe_allow_html=True,
-    )
+            st.markdown("</div>", unsafe_allow_html=True)
 
 
 def chamada_turma(turma_nome):
@@ -1811,7 +1810,6 @@ professores = sorted({turma["professor"] for turma in TURMAS})
 professor = ""
 if perfil == "Professor":
     professor = usuario_logado["nome"] if usuario_logado["nome"] in professores else professores[0]
-aplicar_query_params(perfil)
 pagina = selecionar_pagina(perfil)
 
 if pagina == "Inicio":
