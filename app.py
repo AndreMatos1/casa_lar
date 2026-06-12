@@ -1,3 +1,5 @@
+from datetime import date
+
 import streamlit as st
 
 
@@ -11,8 +13,10 @@ ALUNOS = [
         "idade": 8,
         "responsavel": "Mariana Santos",
         "telefone": "(11) 90000-0101",
-        "oficinas": "Ballet, Violao",
+        "oficina": "Dancas",
+        "modalidade": "Ballet",
         "turma": "Ballet Infantil A",
+        "professor": "Camila Rocha",
         "status": "Ativo",
     },
     {
@@ -21,8 +25,10 @@ ALUNOS = [
         "idade": 11,
         "responsavel": "Carlos Oliveira",
         "telefone": "(11) 90000-0202",
-        "oficinas": "Futebol",
+        "oficina": "Esportes",
+        "modalidade": "Futebol",
         "turma": "Sub-12 Futebol",
+        "professor": "Diego Martins",
         "status": "Ativo",
     },
     {
@@ -31,9 +37,35 @@ ALUNOS = [
         "idade": 10,
         "responsavel": "Patricia Lima",
         "telefone": "(11) 90000-0303",
-        "oficinas": "Dancas Urbanas, Artes",
+        "oficina": "Dancas",
+        "modalidade": "Dancas Urbanas",
         "turma": "Dancas Urbanas I",
+        "professor": "Camila Rocha",
         "status": "Pendente",
+    },
+    {
+        "id": "ALU-004",
+        "nome": "Joao Pedro Costa",
+        "idade": 13,
+        "responsavel": "Fernanda Costa",
+        "telefone": "(11) 90000-0404",
+        "oficina": "Esportes",
+        "modalidade": "Futebol",
+        "turma": "Sub-14 Futebol",
+        "professor": "Diego Martins",
+        "status": "Ativo",
+    },
+    {
+        "id": "ALU-005",
+        "nome": "Clara Nascimento",
+        "idade": 7,
+        "responsavel": "Renata Nascimento",
+        "telefone": "(11) 90000-0505",
+        "oficina": "Dancas",
+        "modalidade": "Ballet",
+        "turma": "Ballet Infantil A",
+        "professor": "Camila Rocha",
+        "status": "Ativo",
     },
 ]
 
@@ -44,58 +76,55 @@ TURMAS = [
         "modalidade": "Ballet",
         "turma": "Ballet Infantil A",
         "professor": "Camila Rocha",
-        "dias": "Terca e Quinta",
+        "dias": ["Segunda", "Quarta"],
         "horario": "09:00 - 10:15",
         "local": "Sala de Danca",
         "vagas": 20,
         "matriculados": 12,
     },
     {
+        "oficina": "Dancas",
+        "modalidade": "Dancas Urbanas",
+        "turma": "Dancas Urbanas I",
+        "professor": "Camila Rocha",
+        "dias": ["Terca", "Quinta"],
+        "horario": "10:30 - 11:30",
+        "local": "Sala de Danca",
+        "vagas": 18,
+        "matriculados": 11,
+    },
+    {
         "oficina": "Esportes",
         "modalidade": "Futebol",
         "turma": "Sub-12 Futebol",
         "professor": "Diego Martins",
-        "dias": "Segunda, Quarta e Sexta",
+        "dias": ["Segunda", "Quarta", "Sexta"],
         "horario": "08:00 - 09:30",
         "local": "Campo Principal",
         "vagas": 25,
         "matriculados": 18,
     },
     {
+        "oficina": "Esportes",
+        "modalidade": "Futebol",
+        "turma": "Sub-14 Futebol",
+        "professor": "Diego Martins",
+        "dias": ["Terca", "Quinta"],
+        "horario": "15:30 - 17:00",
+        "local": "Campo Principal",
+        "vagas": 25,
+        "matriculados": 21,
+    },
+    {
         "oficina": "Musica",
         "modalidade": "Violao",
         "turma": "Violao Iniciante",
         "professor": "Marcos Araujo",
-        "dias": "Segunda",
+        "dias": ["Segunda"],
         "horario": "14:00 - 15:30",
         "local": "Sala de Musica",
         "vagas": 15,
         "matriculados": 9,
-    },
-]
-
-
-AGENDA = [
-    {
-        "data": "2026-06-15",
-        "tipo": "Aula",
-        "atividade": "Ballet Infantil A",
-        "horario": "09:00",
-        "local": "Sala de Danca",
-    },
-    {
-        "data": "2026-06-16",
-        "tipo": "Treino",
-        "atividade": "Treino Sub-12 Futebol",
-        "horario": "08:00",
-        "local": "Campo Principal",
-    },
-    {
-        "data": "2026-06-20",
-        "tipo": "Jogo",
-        "atividade": "Casa Lar x Projeto Esperanca",
-        "horario": "10:00",
-        "local": "Campo Municipal",
     },
 ]
 
@@ -120,24 +149,6 @@ JOGOS = [
 ]
 
 
-TREINOS = [
-    {
-        "categoria": "Sub-12",
-        "data": "2026-06-18",
-        "horario": "08:00",
-        "tipo": "Treino tecnico",
-        "local": "Campo Principal",
-    },
-    {
-        "categoria": "Sub-14",
-        "data": "2026-06-21",
-        "horario": "15:00",
-        "tipo": "Treino extra",
-        "local": "Campo Principal",
-    },
-]
-
-
 FICHAS = [
     {
         "arquivo": "ficha_livia_santos.pdf",
@@ -154,6 +165,10 @@ FICHAS = [
         "confianca": "72%",
     },
 ]
+
+
+DIAS_SEMANA = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"]
+DIA_ATUAL_DEMO = "Sexta"
 
 
 MENU_POR_PERFIL = {
@@ -181,10 +196,10 @@ MENU_POR_PERFIL = {
 
 
 SUBMENUS = {
-    "Alunos": ["Consulta", "Cadastro", "Documentos"],
-    "Oficinas": ["Turmas", "Horarios", "Professores"],
+    "Alunos": ["Consulta", "Meus alunos", "Cadastro", "Documentos"],
+    "Oficinas": ["Agenda semanal", "Minhas turmas", "Chamada"],
     "Agenda": ["Aulas", "Jogos", "Treinos", "Recados"],
-    "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados"],
+    "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados", "Chamada"],
     "Gestao de matriculas": ["Inscricoes", "Incluir em turma", "Pendencias"],
     "Digitalizacao": ["Enviar ficha", "Revisar dados", "Aprovar cadastro"],
     "Dashboard": ["Indicadores", "Oficinas", "Esportivo"],
@@ -195,28 +210,67 @@ def aplicar_estilo():
     st.markdown(
         """
         <style>
+        .block-container {
+            padding-top: 1.8rem;
+        }
         div.stButton > button {
             width: 100%;
-            border-radius: 6px;
-            border: 1px solid #d5dbe5;
-            background: #f7f9fc;
+            border-radius: 14px;
+            border: 1px solid #cfd8e3;
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
             color: #1d2733;
-            font-weight: 600;
-            padding: 0.58rem 0.75rem;
+            font-weight: 700;
+            min-height: 42px;
+            padding: 0.62rem 0.9rem;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
         }
         div.stButton > button:hover {
             border-color: #2563eb;
             color: #1746a2;
-            background: #eef4ff;
+            background: #edf4ff;
+        }
+        div.stButton > button:disabled {
+            border-color: #1d4ed8;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.24);
         }
         section[data-testid="stSidebar"] div.stButton > button {
             justify-content: flex-start;
             text-align: left;
         }
+        .card {
+            border: 1px solid #d9e2ec;
+            border-radius: 14px;
+            padding: 14px 16px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+            min-height: 112px;
+        }
+        .card strong {
+            color: #0f172a;
+        }
+        .today-card {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .muted {
+            color: #667085;
+            font-size: 0.9rem;
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
+
+
+def navegar_para(pagina, subpagina=None, turma=None):
+    st.session_state.pagina = pagina
+    if subpagina:
+        st.session_state[f"subpagina_{pagina}"] = subpagina
+    if turma:
+        st.session_state.turma_selecionada = turma
 
 
 def selecionar_pagina(perfil):
@@ -228,9 +282,10 @@ def selecionar_pagina(perfil):
     st.sidebar.caption("Menu por perfil")
 
     for pagina in paginas:
-        if st.sidebar.button(pagina, key=f"menu_{pagina}", use_container_width=True):
-            st.session_state.pagina = pagina
-            st.session_state.subpagina = SUBMENUS.get(pagina, ["Principal"])[0]
+        ativo = pagina == st.session_state.pagina
+        label = f"> {pagina}" if ativo else pagina
+        if st.sidebar.button(label, key=f"menu_{pagina}", disabled=ativo):
+            navegar_para(pagina, SUBMENUS.get(pagina, ["Principal"])[0])
 
     st.sidebar.divider()
     st.sidebar.caption(f"Perfil ativo: {perfil}")
@@ -245,7 +300,9 @@ def botoes_submenu(pagina):
 
     cols = st.columns(len(opcoes))
     for col, opcao in zip(cols, opcoes):
-        if col.button(opcao, key=f"{pagina}_{opcao}", use_container_width=True):
+        ativo = opcao == st.session_state[chave]
+        label = f"> {opcao}" if ativo else opcao
+        if col.button(label, key=f"{pagina}_{opcao}", use_container_width=True, disabled=ativo):
             st.session_state[chave] = opcao
 
     return st.session_state[chave]
@@ -254,6 +311,18 @@ def botoes_submenu(pagina):
 def tabela_fechada(titulo, dados):
     with st.expander(titulo, expanded=False):
         st.dataframe(dados, use_container_width=True, hide_index=True)
+
+
+def alunos_por_turma(turma):
+    return [aluno for aluno in ALUNOS if aluno["turma"] == turma]
+
+
+def turmas_do_professor(professor):
+    return [turma for turma in TURMAS if turma["professor"] == professor]
+
+
+def alunos_do_professor(professor):
+    return [aluno for aluno in ALUNOS if aluno["professor"] == professor]
 
 
 def metricas():
@@ -266,32 +335,123 @@ def metricas():
     col4.metric("Jogos", len(JOGOS))
 
 
-def inicio():
+def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas"):
+    alunos = alunos_por_turma(turma["turma"])
+    ocupacao = f"{turma['matriculados']} / {turma['vagas']} vagas"
+    st.markdown(
+        f"""
+        <div class="card">
+            <strong>{turma['turma']}</strong><br>
+            <span class="muted">{turma['modalidade']} | {turma['horario']} | {turma['local']}</span><br>
+            <span class="muted">{ocupacao} | {len(alunos)} alunos na amostra</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button(f"Abrir {turma['turma']}", key=f"abrir_{destino}_{subpagina}_{turma['turma']}"):
+        navegar_para(destino, subpagina, turma["turma"])
+        st.rerun()
+
+
+def agenda_semanal(turmas, destino="Oficinas"):
+    st.subheader("Agenda semanal")
+    cols = st.columns(len(DIAS_SEMANA))
+    for col, dia in zip(cols, DIAS_SEMANA):
+        eventos = [turma for turma in turmas if dia in turma["dias"]]
+        classe = "card today-card" if dia == DIA_ATUAL_DEMO else "card"
+        col.markdown(
+            f"<div class='{classe}'><strong>{dia}</strong><br><span class='muted'>{'Hoje' if dia == DIA_ATUAL_DEMO else 'Semana'}</span></div>",
+            unsafe_allow_html=True,
+        )
+        if not eventos:
+            col.caption("Sem atividades")
+        for turma in eventos:
+            if col.button(
+                f"{turma['horario']} | {turma['turma']}",
+                key=f"agenda_{destino}_{dia}_{turma['turma']}",
+                use_container_width=True,
+            ):
+                navegar_para(destino, "Minhas turmas" if destino == "Oficinas" else "Turmas", turma["turma"])
+                st.rerun()
+
+
+def chamada_turma(turma_nome):
+    alunos = alunos_por_turma(turma_nome)
+    st.subheader(f"Chamada - {turma_nome}")
+    if not alunos:
+        st.info("Nenhum aluno encontrado para esta turma na base demonstrativa.")
+        return
+
+    with st.form(f"chamada_{turma_nome}"):
+        presencas = {}
+        for aluno in alunos:
+            presencas[aluno["nome"]] = st.checkbox(aluno["nome"], value=True)
+        observacoes = st.text_area("Observacoes da aula")
+        salvar = st.form_submit_button("Salvar chamada de teste")
+    if salvar:
+        presentes = len([valor for valor in presencas.values() if valor])
+        st.success(f"Chamada registrada: {presentes} presente(s), {len(alunos) - presentes} falta(s).")
+        if observacoes:
+            st.caption(f"Observacoes: {observacoes}")
+
+
+def inicio(perfil, professor):
     st.title("Irma Carmen Casa Lar")
-    st.caption(
-        "Prototipo inicial em Streamlit com dados ficticios para apresentacao e discussao com a instituicao."
-    )
+    st.caption("Prototipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
-    tabela_fechada("Abrir proximas atividades", AGENDA)
 
-    st.subheader("Objetivo desta versao")
-    st.write(
-        "Validar os principais fluxos: cadastro de alunos, matriculas, oficinas, "
-        "agenda, futebol, digitalizacao de fichas e comunicacao com responsaveis."
-    )
+    st.subheader("Atalhos")
+    atalhos_padrao = ["Turmas", "Futebol", "Meus alunos", "Chamada"]
+    atalhos = st.multiselect("Editar atalhos da tela inicial", atalhos_padrao, default=atalhos_padrao)
+    cols = st.columns(max(len(atalhos), 1))
+    for col, atalho in zip(cols, atalhos):
+        if col.button(atalho, key=f"atalho_{atalho}", use_container_width=True):
+            if atalho == "Turmas":
+                navegar_para("Oficinas", "Minhas turmas")
+            elif atalho == "Futebol":
+                navegar_para("Futebol", "Turmas")
+            elif atalho == "Meus alunos":
+                navegar_para("Alunos", "Meus alunos")
+            elif atalho == "Chamada":
+                navegar_para("Oficinas", "Chamada")
+            st.rerun()
+
+    turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
+    agenda_semanal(turmas)
 
 
-def alunos():
+def alunos(perfil, professor):
     st.header("Alunos")
     subpagina = botoes_submenu("Alunos")
 
+    base = alunos_do_professor(professor) if perfil == "Professor" else ALUNOS
+
     if subpagina == "Consulta":
-        busca = st.text_input("Buscar aluno, responsavel, turma ou oficina")
-        filtrados = ALUNOS
-        if busca:
+        with st.form("busca_aluno"):
+            busca = st.text_input("Buscar aluno, responsavel, turma ou oficina")
+            buscar = st.form_submit_button("Buscar")
+        filtrados = base
+        if buscar and busca:
             termo = busca.lower()
-            filtrados = [aluno for aluno in ALUNOS if termo in str(aluno).lower()]
-        tabela_fechada("Abrir tabela de alunos", filtrados)
+            filtrados = [aluno for aluno in base if termo in str(aluno).lower()]
+        st.dataframe(filtrados, use_container_width=True, hide_index=True)
+
+    elif subpagina == "Meus alunos":
+        st.caption("Alunos vinculados as turmas do professor selecionado.")
+        turmas = ["Todas"] + sorted({aluno["turma"] for aluno in base})
+        status = ["Todos"] + sorted({aluno["status"] for aluno in base})
+        col1, col2 = st.columns(2)
+        filtro_turma = col1.selectbox("Filtrar por turma", turmas)
+        filtro_status = col2.selectbox("Filtrar por status", status)
+        filtrados = base
+        if filtro_turma != "Todas":
+            filtrados = [aluno for aluno in filtrados if aluno["turma"] == filtro_turma]
+        if filtro_status != "Todos":
+            filtrados = [aluno for aluno in filtrados if aluno["status"] == filtro_status]
+        tabela_fechada("Meus alunos", filtrados)
+        if filtro_turma != "Todas" and st.button("Abrir turma selecionada"):
+            navegar_para("Oficinas", "Minhas turmas", filtro_turma)
+            st.rerun()
 
     elif subpagina == "Cadastro":
         with st.form("cadastro_aluno"):
@@ -304,38 +464,62 @@ def alunos():
                 st.success(f"Cadastro de {nome or 'novo aluno'} simulado com sucesso.")
 
     elif subpagina == "Documentos":
-        tabela_fechada("Abrir documentos pendentes", FICHAS)
+        tabela_fechada("Documentos pendentes", FICHAS)
         st.file_uploader("Enviar documento do aluno", type=["pdf", "png", "jpg", "jpeg"])
 
 
-def oficinas():
+def oficinas(perfil, professor):
     st.header("Oficinas")
     subpagina = botoes_submenu("Oficinas")
+    base_turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
 
-    if subpagina == "Turmas":
-        tabela_fechada("Abrir tabela de turmas", TURMAS)
-    elif subpagina == "Horarios":
-        horarios = [
-            {
-                "turma": item["turma"],
-                "dias": item["dias"],
-                "horario": item["horario"],
-                "local": item["local"],
-            }
-            for item in TURMAS
-        ]
-        tabela_fechada("Abrir horarios das oficinas", horarios)
-    elif subpagina == "Professores":
-        professores = [
-            {
-                "professor": item["professor"],
-                "oficina": item["oficina"],
-                "modalidade": item["modalidade"],
-                "turma": item["turma"],
-            }
-            for item in TURMAS
-        ]
-        tabela_fechada("Abrir professores e turmas", professores)
+    if subpagina == "Agenda semanal":
+        agenda_semanal(base_turmas)
+
+    elif subpagina == "Minhas turmas":
+        st.caption("Acesse cada turma para ver vagas, alunos e aulas da semana.")
+        modalidades = ["Todas"] + sorted({turma["modalidade"] for turma in base_turmas})
+        modalidade = st.selectbox("Filtrar por oficina/modalidade", modalidades)
+        turmas_filtradas = base_turmas
+        if modalidade != "Todas":
+            turmas_filtradas = [turma for turma in base_turmas if turma["modalidade"] == modalidade]
+
+        cols = st.columns(2)
+        for index, turma in enumerate(turmas_filtradas):
+            with cols[index % 2]:
+                card_turma(turma)
+
+        selecionada = st.session_state.get(
+            "turma_selecionada",
+            turmas_filtradas[0]["turma"] if turmas_filtradas else "",
+        )
+        if selecionada:
+            st.divider()
+            st.subheader(f"Detalhes da turma: {selecionada}")
+            turma = next(item for item in TURMAS if item["turma"] == selecionada)
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Vagas", turma["vagas"])
+            col2.metric("Matriculados", turma["matriculados"])
+            col3.metric("Alunos na amostra", len(alunos_por_turma(selecionada)))
+            tabela_fechada("Alunos da turma", alunos_por_turma(selecionada))
+            tabela_fechada(
+                "Aulas da semana",
+                [
+                    {
+                        "dia": dia,
+                        "horario": turma["horario"],
+                        "local": turma["local"],
+                        "professor": turma["professor"],
+                    }
+                    for dia in turma["dias"]
+                ],
+            )
+
+    elif subpagina == "Chamada":
+        turmas = [turma["turma"] for turma in base_turmas]
+        turma_padrao = st.session_state.get("turma_selecionada", turmas[0] if turmas else "")
+        turma = st.selectbox("Turma", turmas, index=turmas.index(turma_padrao) if turma_padrao in turmas else 0)
+        chamada_turma(turma)
 
 
 def agenda():
@@ -343,42 +527,54 @@ def agenda():
     subpagina = botoes_submenu("Agenda")
 
     if subpagina == "Aulas":
-        tabela_fechada("Abrir agenda de aulas", [item for item in AGENDA if item["tipo"] == "Aula"])
+        agenda_semanal(TURMAS)
     elif subpagina == "Jogos":
-        tabela_fechada("Abrir agenda de jogos", [item for item in AGENDA if item["tipo"] == "Jogo"])
+        tabela_fechada("Agenda de jogos", JOGOS)
     elif subpagina == "Treinos":
-        tabela_fechada("Abrir agenda de treinos", TREINOS)
+        treinos = [turma for turma in TURMAS if turma["modalidade"] == "Futebol"]
+        agenda_semanal(treinos, "Futebol")
     elif subpagina == "Recados":
         st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
-        st.text_area(
-            "Mensagem",
-            "Ola, temos um comunicado da Casa Lar sobre a proxima atividade.",
-        )
+        st.text_area("Mensagem", "Ola, temos um comunicado da Casa Lar sobre a proxima atividade.")
         st.button("Simular envio por WhatsApp")
         st.info("Na versao real, podemos integrar WhatsApp Cloud API, Twilio, Z-API ou outro provedor.")
 
 
-def futebol():
+def futebol(perfil, professor):
     st.header("Futebol")
     subpagina = botoes_submenu("Futebol")
+    futebol_turmas = [item for item in TURMAS if item["modalidade"] == "Futebol"]
+    if perfil == "Professor":
+        futebol_turmas = [item for item in futebol_turmas if item["professor"] == professor]
 
     if subpagina == "Turmas":
-        futebol_turmas = [item for item in TURMAS if item["modalidade"] == "Futebol"]
-        tabela_fechada("Abrir turmas de futebol", futebol_turmas)
+        cols = st.columns(2)
+        for index, turma in enumerate(futebol_turmas):
+            with cols[index % 2]:
+                card_turma(turma, "Futebol", "Turmas")
+
     elif subpagina == "Agenda jogo":
-        tabela_fechada("Abrir agenda de jogos", JOGOS)
+        tabela_fechada("Agenda de jogos", JOGOS)
+
     elif subpagina == "Agenda treinos":
-        tabela_fechada("Abrir agenda de treinos", TREINOS)
+        agenda_semanal(futebol_turmas, "Futebol")
+
     elif subpagina == "Resultados":
-        tabela_fechada("Abrir resultados", [item for item in JOGOS if item["status"] == "Finalizado"])
+        tabela_fechada("Resultados", [item for item in JOGOS if item["status"] == "Finalizado"])
         st.subheader("Registrar resultado demonstrativo")
-        jogo = st.selectbox(
-            "Jogo",
-            [f"{item['categoria']} - {item['adversario']}" for item in JOGOS],
-        )
+        jogo = st.selectbox("Jogo", [f"{item['categoria']} - {item['adversario']}" for item in JOGOS])
         placar = st.text_input("Placar", placeholder="Ex.: 2 x 1")
         if st.button("Salvar resultado de teste"):
             st.success(f"Resultado {placar or '-'} registrado para {jogo}.")
+
+    elif subpagina == "Chamada":
+        turmas = [turma["turma"] for turma in futebol_turmas]
+        if not turmas:
+            st.info("Nenhuma turma de futebol para este professor.")
+            return
+        turma_padrao = st.session_state.get("turma_selecionada", turmas[0])
+        turma = st.selectbox("Turma", turmas, index=turmas.index(turma_padrao) if turma_padrao in turmas else 0)
+        chamada_turma(turma)
 
 
 def gestao_matriculas():
@@ -386,15 +582,14 @@ def gestao_matriculas():
     subpagina = botoes_submenu("Gestao de matriculas")
 
     if subpagina == "Inscricoes":
-        tabela_fechada("Abrir inscricoes recebidas", ALUNOS)
+        tabela_fechada("Inscricoes recebidas", ALUNOS)
     elif subpagina == "Incluir em turma":
         aluno = st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
         turma = st.selectbox("Turma", [item["turma"] for item in TURMAS])
         if st.button("Incluir aluno na turma"):
             st.success(f"{aluno} incluido em {turma} para demonstracao.")
     elif subpagina == "Pendencias":
-        pendentes = [item for item in ALUNOS if item["status"] == "Pendente"]
-        tabela_fechada("Abrir pendencias de matricula", pendentes)
+        tabela_fechada("Pendencias de matricula", [item for item in ALUNOS if item["status"] == "Pendente"])
 
 
 def digitalizacao():
@@ -405,7 +600,7 @@ def digitalizacao():
         st.file_uploader("Enviar ficha digitalizada", type=["pdf", "png", "jpg", "jpeg"])
         st.info("Nesta versao, o envio e demonstrativo. Depois podemos incluir OCR.")
     elif subpagina == "Revisar dados":
-        tabela_fechada("Abrir fichas para revisao", FICHAS)
+        tabela_fechada("Fichas para revisao", FICHAS)
         st.text_input("Nome revisado")
         st.text_input("Responsavel revisado")
     elif subpagina == "Aprovar cadastro":
@@ -428,26 +623,28 @@ def dashboard():
     elif subpagina == "Oficinas":
         st.subheader("Matriculas por turma")
         st.bar_chart({turma["turma"]: turma["matriculados"] for turma in TURMAS})
-        tabela_fechada("Abrir dados das oficinas", TURMAS)
+        tabela_fechada("Dados das oficinas", TURMAS)
     elif subpagina == "Esportivo":
         st.subheader("Resumo esportivo")
-        tabela_fechada("Abrir jogos e resultados", JOGOS)
+        tabela_fechada("Jogos e resultados", JOGOS)
 
 
 aplicar_estilo()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
+professores = sorted({turma["professor"] for turma in TURMAS})
+professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
 pagina = selecionar_pagina(perfil)
 
 if pagina == "Inicio":
-    inicio()
+    inicio(perfil, professor)
 elif pagina == "Alunos":
-    alunos()
+    alunos(perfil, professor)
 elif pagina == "Oficinas":
-    oficinas()
+    oficinas(perfil, professor)
 elif pagina == "Agenda":
     agenda()
 elif pagina == "Futebol":
-    futebol()
+    futebol(perfil, professor)
 elif pagina == "Gestao de matriculas":
     gestao_matriculas()
 elif pagina == "Digitalizacao":
