@@ -3,9 +3,13 @@ from pathlib import Path
 import streamlit as st
 
 
-st.set_page_config(page_title="Irma Carmen Casa Lar", layout="wide")
-
 LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
+
+st.set_page_config(
+    page_title="Irma Carmen Casa Lar",
+    page_icon=str(LOGO_PATH),
+    layout="wide",
+)
 
 
 ALUNOS = [
