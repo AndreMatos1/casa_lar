@@ -1,8 +1,11 @@
 from datetime import date
+from pathlib import Path
 import streamlit as st
 
 
 st.set_page_config(page_title="Irma Carmen Casa Lar", layout="wide")
+
+LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
 
 
 ALUNOS = [
@@ -330,6 +333,17 @@ def aplicar_estilo():
     )
 
 
+def exibir_logo_sidebar():
+    if LOGO_PATH.exists():
+        st.sidebar.image(str(LOGO_PATH), use_container_width=True)
+
+
+def exibir_logo_inicio():
+    if LOGO_PATH.exists():
+        left, center, right = st.columns([1, 1, 1])
+        center.image(str(LOGO_PATH), use_container_width=True)
+
+
 def navegar_para(pagina, subpagina=None, turma=None):
     st.session_state.pagina = pagina
     if subpagina:
@@ -489,41 +503,28 @@ def chamada_turma(turma_nome):
         data_chamada = st.date_input("Data da chamada", value=date.today())
         st.caption("Marque presente ou ausente e, se necessário, registre uma observação curta por aluno.")
 
-        header = st.columns([3, 1, 1, 3])
+        header = st.columns([3, 2, 3])
         header[0].markdown("**Aluno**")
-        header[1].markdown("**Presente**")
-        header[2].markdown("**Ausente**")
-        header[3].markdown("**Observação**")
+        header[1].markdown("**Presença**")
+        header[2].markdown("**Observação**")
 
         registros = []
         for aluno in alunos:
-            row = st.columns([3, 1, 1, 3])
+            row = st.columns([3, 2, 3])
             row[0].write(aluno["nome"])
-            presente = row[1].checkbox(
-                "Presente",
-                value=True,
-                key=f"presente_{turma_nome}_{aluno['id']}",
+            status = row[1].radio(
+                "Presença",
+                ["Presente", "Ausente"],
+                horizontal=True,
+                key=f"presenca_{turma_nome}_{aluno['id']}",
                 label_visibility="collapsed",
             )
-            ausente = row[2].checkbox(
-                "Ausente",
-                value=False,
-                key=f"ausente_{turma_nome}_{aluno['id']}",
-                label_visibility="collapsed",
-            )
-            observacao = row[3].text_input(
+            observacao = row[2].text_input(
                 "Observação",
                 key=f"obs_{turma_nome}_{aluno['id']}",
                 label_visibility="collapsed",
                 placeholder="Ex.: chegou atrasado",
             )
-
-            if presente and ausente:
-                status = "Conferir"
-            elif ausente:
-                status = "Ausente"
-            else:
-                status = "Presente"
 
             registros.append(
                 {
@@ -538,14 +539,10 @@ def chamada_turma(turma_nome):
         salvar = st.form_submit_button("Salvar chamada")
 
     if salvar:
-        conflitos = [registro for registro in registros if registro["status"] == "Conferir"]
-        if conflitos:
-            st.error("Revise a chamada: alguns alunos estão marcados como presente e ausente ao mesmo tempo.")
-        else:
-            st.session_state.chamadas_salvas.extend(registros)
-            presentes = len([registro for registro in registros if registro["status"] == "Presente"])
-            ausentes = len([registro for registro in registros if registro["status"] == "Ausente"])
-            st.success(f"Chamada salva: {presentes} presente(s), {ausentes} ausente(s).")
+        st.session_state.chamadas_salvas.extend(registros)
+        presentes = len([registro for registro in registros if registro["status"] == "Presente"])
+        ausentes = len([registro for registro in registros if registro["status"] == "Ausente"])
+        st.success(f"Chamada salva: {presentes} presente(s), {ausentes} ausente(s).")
 
     historico = [
         registro
@@ -557,6 +554,7 @@ def chamada_turma(turma_nome):
 
 
 def inicio(perfil, professor):
+    exibir_logo_inicio()
     st.title("Irma Carmen Casa Lar")
     st.caption("Prototipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
@@ -795,6 +793,7 @@ def dashboard():
 
 
 aplicar_estilo()
+exibir_logo_sidebar()
 perfil = st.sidebar.selectbox("Perfil", ["Professor", "Gestor", "Diretor"])
 professores = sorted({turma["professor"] for turma in TURMAS})
 professor = st.sidebar.selectbox("Professor demonstrativo", professores) if perfil == "Professor" else ""
