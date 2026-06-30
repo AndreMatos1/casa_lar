@@ -781,7 +781,7 @@ def exibir_logo_sidebar():
 def exibir_logo_inicio():
     if LOGO_PATH.exists():
         left, center, right = st.columns([1, 1, 1])
-        center.image(str(LOGO_PATH), width=360)
+        center.image(str(LOGO_PATH), width=280)
 
 
 def imagem_base64(caminho):
@@ -1399,7 +1399,7 @@ def compromissos_recorrentes(turmas, data_dia, tipo):
         {
             "data": data_dia.isoformat(),
             "horario": turma["horario"].split(" - ")[0],
-            "tipo": tipo,
+            "tipo": tipo or ("Treino" if turma["modalidade"] == "Futebol" else "Aula"),
             "titulo": turma["turma"],
             "turma": turma["turma"],
             "local": turma["local"],
@@ -1589,9 +1589,8 @@ def chamada_turma(turma_nome):
 
 
 def inicio(perfil, professor):
+    cabecalho_pagina("Início")
     exibir_logo_inicio()
-    cabecalho_pagina("Irmã Carmen Casa Lar")
-    st.caption("Protótipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
 
     st.subheader("Atalhos")
@@ -1610,7 +1609,12 @@ def inicio(perfil, professor):
                 nav_link(atalho, "Oficinas", "Chamada")
 
     turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
-    agenda_semanal(turmas)
+    turmas_futebol = [turma for turma in turmas if turma["modalidade"] == "Futebol"]
+    turmas_oficinas = [turma for turma in turmas if turma["modalidade"] != "Futebol"]
+    eventos = eventos_futebol(turmas_futebol) + eventos_oficinas(turmas_oficinas)
+    st.subheader("Agenda semanal")
+    st.caption("Todos os compromissos da semana reunidos em uma única visão.")
+    agenda_compromissos(turmas, eventos, "Inicio", None)
 
 
 def alunos(perfil, professor):
