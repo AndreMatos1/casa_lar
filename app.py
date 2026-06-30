@@ -1,5 +1,5 @@
 import base64
-from datetime import date
+from datetime import date, timedelta
 from html import escape
 from io import BytesIO
 from pathlib import Path
@@ -143,7 +143,7 @@ JOGOS = [
         "categoria": "Sub-12",
         "turma": "Sub-12 Futebol",
         "competicao": "Liga Amistosa Regional",
-        "data": "2026-06-20",
+        "data": "2026-07-05",
         "horario": "09:00",
         "local": "Campo Principal",
         "adversario": "Projeto Esperanca",
@@ -160,6 +160,26 @@ JOGOS = [
         "adversario": "Escola Vida",
         "status": "Finalizado",
         "placar": "3 x 1",
+    },
+]
+
+
+EVENTOS_OFICINAS = [
+    {
+        "data": "2026-07-04",
+        "horario": "10:00",
+        "tipo": "Ensaio",
+        "titulo": "Ensaio geral de Ballet",
+        "turma": "Ballet Infantil A",
+        "local": "Auditório",
+    },
+    {
+        "data": "2026-07-05",
+        "horario": "16:00",
+        "tipo": "Apresentação",
+        "titulo": "Mostra Cultural Casa Lar",
+        "turma": "Danças Urbanas I",
+        "local": "Praça da Comunidade",
     },
 ]
 
@@ -236,7 +256,7 @@ USUARIOS_INICIAIS = [
 ]
 
 
-DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 DIA_ATUAL_DEMO = "Sexta"
 
 
@@ -270,7 +290,7 @@ SUBMENUS = {
     "Alunos": ["Consulta", "Meus alunos", "Cadastro", "Pendencias"],
     "Oficinas": ["Agenda semanal", "Minhas turmas", "Chamada"],
     "Agenda": ["Aulas", "Jogos", "Treinos", "Recados"],
-    "Futebol": ["Turmas", "Agenda jogo", "Agenda treinos", "Resultados", "Chamada"],
+    "Futebol": ["Agenda semanal", "Minhas turmas", "Chamada", "Resultados"],
     "Gestao de matriculas": [
         "Cadastrar nova atividade",
         "Cadastrar novos alunos",
@@ -521,7 +541,7 @@ def aplicar_estilo():
         }
         .agenda-grid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(130px, 1fr));
+            grid-template-columns: repeat(7, minmax(145px, 1fr));
             border: 1px solid #d9e2ec;
             border-radius: 14px;
             overflow-x: auto;
@@ -585,7 +605,98 @@ def aplicar_estilo():
         }
         @media (max-width: 900px) {
             .agenda-grid {
-                grid-template-columns: repeat(6, minmax(190px, 1fr));
+                grid-template-columns: repeat(7, minmax(190px, 1fr));
+            }
+        }
+        .week-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(150px, 1fr));
+            border: 1px solid #d0d5dd;
+            border-radius: 12px;
+            overflow-x: auto;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+        }
+        .week-day {
+            min-height: 430px;
+            border-right: 1px solid #e4e7ec;
+            background:
+                linear-gradient(#eef2f6 1px, transparent 1px),
+                #ffffff;
+            background-size: 100% 58px;
+        }
+        .week-day:last-child {
+            border-right: 0;
+        }
+        .week-day.is-today {
+            background:
+                linear-gradient(#dbeafe 1px, transparent 1px),
+                #f8fbff;
+        }
+        .week-day-header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            padding: 10px 8px;
+            border-bottom: 1px solid #d0d5dd;
+            background: #f8fafc;
+            text-align: center;
+        }
+        .week-day-header strong {
+            display: block;
+            color: #101828;
+            font-size: 0.9rem;
+        }
+        .week-day-header span {
+            color: #667085;
+            font-size: 0.78rem;
+        }
+        .week-day.is-today .week-day-header {
+            background: #dbeafe;
+        }
+        .calendar-events {
+            padding: 8px;
+        }
+        .calendar-event {
+            margin-bottom: 8px;
+            padding: 8px;
+            border: 1px solid #bfdbfe;
+            border-left: 4px solid #2563eb;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: #172033;
+            font-size: 0.78rem;
+            line-height: 1.3;
+        }
+        .calendar-event.event-game {
+            border-color: #fecaca;
+            border-left-color: #dc2626;
+            background: #fff1f2;
+        }
+        .calendar-event.event-rehearsal {
+            border-color: #fde68a;
+            border-left-color: #d97706;
+            background: #fffbeb;
+        }
+        .calendar-event.event-presentation {
+            border-color: #bbf7d0;
+            border-left-color: #16a34a;
+            background: #f0fdf4;
+        }
+        .calendar-event-time {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+        .calendar-empty {
+            padding: 14px 8px;
+            color: #98a2b3;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        @media (max-width: 1100px) {
+            .week-calendar {
+                grid-template-columns: repeat(7, minmax(175px, 1fr));
             }
         }
         .muted {
@@ -1206,6 +1317,119 @@ def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=
     nav_link(f"Abrir {turma['turma']}", destino, subpagina, turma["turma"], key_suffix=key_suffix)
 
 
+def inicio_semana_atual():
+    hoje = date.today()
+    return hoje - timedelta(days=hoje.weekday())
+
+
+def classe_evento(tipo):
+    return {
+        "Jogo": "event-game",
+        "Ensaio": "event-rehearsal",
+        "Apresentação": "event-presentation",
+    }.get(tipo, "")
+
+
+def compromissos_recorrentes(turmas, data_dia, tipo):
+    dia_semana = DIAS_SEMANA[data_dia.weekday()]
+    return [
+        {
+            "data": data_dia.isoformat(),
+            "horario": turma["horario"].split(" - ")[0],
+            "tipo": tipo,
+            "titulo": turma["turma"],
+            "turma": turma["turma"],
+            "local": turma["local"],
+        }
+        for turma in turmas
+        if dia_semana in turma["dias"]
+    ]
+
+
+def agenda_compromissos(turmas, eventos_pontuais, contexto, tipo_recorrente):
+    chave = f"inicio_semana_{contexto.lower()}"
+    if chave not in st.session_state:
+        st.session_state[chave] = inicio_semana_atual().isoformat()
+    inicio = date.fromisoformat(st.session_state[chave])
+
+    anterior, hoje_col, periodo, proxima = st.columns([1, 1, 3, 1])
+    if anterior.button("Semana anterior", key=f"agenda_anterior_{contexto}", use_container_width=True):
+        st.session_state[chave] = (inicio - timedelta(days=7)).isoformat()
+        st.rerun()
+    if hoje_col.button("Semana atual", key=f"agenda_atual_{contexto}", use_container_width=True):
+        st.session_state[chave] = inicio_semana_atual().isoformat()
+        st.rerun()
+    fim = inicio + timedelta(days=6)
+    periodo.markdown(
+        f"<div style='text-align:center;padding:9px 0;font-weight:800'>"
+        f"{inicio.strftime('%d/%m/%Y')} a {fim.strftime('%d/%m/%Y')}</div>",
+        unsafe_allow_html=True,
+    )
+    if proxima.button("Próxima semana", key=f"agenda_proxima_{contexto}", use_container_width=True):
+        st.session_state[chave] = (inicio + timedelta(days=7)).isoformat()
+        st.rerun()
+
+    dias_html = []
+    for deslocamento, nome_dia in enumerate(DIAS_SEMANA):
+        data_dia = inicio + timedelta(days=deslocamento)
+        eventos = compromissos_recorrentes(turmas, data_dia, tipo_recorrente)
+        eventos.extend(
+            evento for evento in eventos_pontuais if evento.get("data") == data_dia.isoformat()
+        )
+        eventos.sort(key=lambda evento: evento.get("horario", "99:99"))
+
+        eventos_html = []
+        for evento in eventos:
+            tipo = escape(evento.get("tipo", "Compromisso"))
+            titulo = escape(evento.get("titulo", evento.get("turma", "Compromisso")))
+            horario = escape(evento.get("horario", ""))
+            local = escape(evento.get("local", "A definir"))
+            eventos_html.append(
+                f"<div class='calendar-event {classe_evento(evento.get('tipo'))}'>"
+                f"<span class='calendar-event-time'>{horario} | {tipo}</span>"
+                f"<strong>{titulo}</strong><br><span>{local}</span></div>"
+            )
+        if not eventos_html:
+            eventos_html.append("<div class='calendar-empty'>Sem compromissos</div>")
+
+        hoje_classe = " is-today" if data_dia == date.today() else ""
+        dias_html.append(
+            f"<div class='week-day{hoje_classe}'>"
+            f"<div class='week-day-header'><strong>{nome_dia}</strong>"
+            f"<span>{data_dia.strftime('%d/%m')}</span></div>"
+            f"<div class='calendar-events'>{''.join(eventos_html)}</div></div>"
+        )
+
+    st.markdown(
+        f"<div class='week-calendar'>{''.join(dias_html)}</div>",
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Azul: aulas ou treinos | Vermelho: jogos | Amarelo: ensaios | Verde: apresentações"
+    )
+
+
+def eventos_futebol(turmas):
+    turmas_permitidas = {turma["turma"] for turma in turmas}
+    return [
+        {
+            "data": jogo["data"],
+            "horario": jogo.get("horario", ""),
+            "tipo": "Jogo",
+            "titulo": f"{jogo['turma']} x {jogo['adversario']}",
+            "turma": jogo["turma"],
+            "local": jogo.get("local", "A definir"),
+        }
+        for jogo in jogos_salvos()
+        if jogo.get("turma") in turmas_permitidas
+    ]
+
+
+def eventos_oficinas(turmas):
+    turmas_permitidas = {turma["turma"] for turma in turmas}
+    return [evento for evento in EVENTOS_OFICINAS if evento["turma"] in turmas_permitidas]
+
+
 def agenda_semanal(turmas, destino="Oficinas"):
     st.subheader("Agenda semanal")
     cols = st.columns(len(DIAS_SEMANA))
@@ -1230,7 +1454,7 @@ def agenda_semanal(turmas, destino="Oficinas"):
                 nav_link(
                     f"{turma['horario']} | {turma['turma']}",
                     destino,
-                    "Minhas turmas" if destino == "Oficinas" else "Turmas",
+                    "Minhas turmas",
                     turma["turma"],
                     key_suffix=f"agenda_{destino}_{dia_index}_{evento_index}",
                 )
@@ -1316,7 +1540,7 @@ def inicio(perfil, professor):
             if atalho == "Turmas":
                 nav_link(atalho, "Oficinas", "Minhas turmas")
             elif atalho == "Futebol":
-                nav_link(atalho, "Futebol", "Turmas")
+                nav_link(atalho, "Futebol", "Agenda semanal")
             elif atalho == "Meus alunos":
                 nav_link(atalho, "Alunos", "Meus alunos")
             elif atalho == "Chamada":
@@ -1381,9 +1605,16 @@ def oficinas(perfil, professor):
     st.header("Oficinas")
     subpagina = botoes_submenu("Oficinas")
     base_turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
+    base_turmas = [turma for turma in base_turmas if turma["modalidade"] != "Futebol"]
 
     if subpagina == "Agenda semanal":
-        agenda_semanal(base_turmas)
+        st.caption("Aulas, ensaios e apresentações reunidos em uma única visão semanal.")
+        agenda_compromissos(
+            base_turmas,
+            eventos_oficinas(base_turmas),
+            "Oficinas",
+            "Aula",
+        )
 
     elif subpagina == "Minhas turmas":
         st.caption("Acesse cada turma para ver vagas, alunos e aulas da semana.")
@@ -1426,6 +1657,9 @@ def oficinas(perfil, professor):
 
     elif subpagina == "Chamada":
         turmas = [turma["turma"] for turma in base_turmas]
+        if not turmas:
+            st.info("Nenhuma turma de oficina disponível para este perfil.")
+            return
         turma_padrao = st.session_state.get("turma_selecionada", turmas[0] if turmas else "")
         turma = st.selectbox("Turma", turmas, index=turmas.index(turma_padrao) if turma_padrao in turmas else 0)
         chamada_turma(turma)
@@ -1449,6 +1683,101 @@ def agenda():
         st.info("Na versão real, podemos integrar WhatsApp Cloud API, Twilio, Z-API ou outro provedor.")
 
 
+def painel_jogos_convocacoes(futebol_turmas):
+    st.subheader("Jogos e convocações")
+    if st.session_state.pop("jogo_salvo", False):
+        st.success("Agendamento incluído e exibido na semana correspondente da agenda.")
+    aba_agenda, aba_novo, aba_convocar = st.tabs(
+        ["Jogos cadastrados", "Novo agendamento", "Convocar jogadores"]
+    )
+    with aba_agenda:
+        tabela_fechada("Agenda de jogos", jogos_para_tabela())
+
+    with aba_novo:
+        with st.form("novo_jogo"):
+            col1, col2 = st.columns(2)
+            turma_nome = col1.selectbox("Turma", [turma["turma"] for turma in futebol_turmas])
+            data_jogo = col2.date_input("Data do jogo", value=date.today(), format="DD/MM/YYYY")
+            horario = col1.text_input("Horário", placeholder="Ex.: 09:00")
+            local = col2.text_input("Local", placeholder="Ex.: Campo Principal")
+            competicao = col1.text_input("Competição")
+            adversario = col2.text_input("Adversário")
+            salvar = st.form_submit_button("Salvar agendamento")
+        if salvar:
+            if not competicao or not adversario or not horario:
+                st.error("Informe competição, adversário e horário.")
+            else:
+                st.session_state.jogos.append(
+                    {
+                        "categoria": turma_nome.replace(" Futebol", ""),
+                        "turma": turma_nome,
+                        "competicao": competicao,
+                        "data": data_jogo.isoformat(),
+                        "horario": horario,
+                        "local": local or "A definir",
+                        "adversario": adversario,
+                        "status": "Agendado",
+                        "placar": "-",
+                    }
+                )
+                st.session_state.jogo_salvo = True
+                st.rerun()
+
+    with aba_convocar:
+        turmas_permitidas = {turma["turma"] for turma in futebol_turmas}
+        jogos_agendados = [
+            jogo
+            for jogo in jogos_salvos()
+            if jogo["status"] == "Agendado" and jogo.get("turma") in turmas_permitidas
+        ]
+        if not jogos_agendados:
+            st.info("Nenhum jogo agendado disponível para convocação.")
+            return
+
+        jogo_index = st.selectbox(
+            "Jogo",
+            range(len(jogos_agendados)),
+            format_func=lambda indice: (
+                f"{formatar_data_br(jogos_agendados[indice]['data'])} | "
+                f"{jogos_agendados[indice].get('horario', '-')} | "
+                f"{jogos_agendados[indice]['turma']} x {jogos_agendados[indice]['adversario']}"
+            ),
+        )
+        jogo = jogos_agendados[jogo_index]
+        turma = next((item for item in futebol_turmas if item["turma"] == jogo["turma"]), None)
+        if not turma:
+            st.warning("Turma do jogo não encontrada para este perfil.")
+            return
+
+        alunos = alunos_por_turma(turma["turma"])
+        st.caption("Marque os jogadores convocados para gerar o PDF.")
+        cabecalho = st.columns([3, 1.2, 2])
+        cabecalho[0].markdown("**Jogador**")
+        cabecalho[1].markdown("**Convocar**")
+        cabecalho[2].markdown("**Turma**")
+        convocados = []
+        for aluno in alunos:
+            linha = st.columns([3, 1.2, 2])
+            linha[0].write(aluno["nome"])
+            convocar = linha[1].checkbox(
+                "Convocar",
+                value=True,
+                key=f"convocar_{jogo['data']}_{jogo['turma']}_{aluno['id']}",
+                label_visibility="collapsed",
+            )
+            linha[2].write(aluno["turma"])
+            if convocar:
+                convocados.append(aluno["nome"])
+        pdf = gerar_pdf_convocacao(jogo, turma, convocados)
+        st.download_button(
+            "Baixar PDF da convocação",
+            data=pdf,
+            file_name=f"convocacao_{jogo['turma'].lower().replace(' ', '_')}.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+
+
 def futebol(perfil, professor):
     st.header("Futebol")
     subpagina = botoes_submenu("Futebol")
@@ -1459,11 +1788,22 @@ def futebol(perfil, professor):
         st.info("Nenhuma turma de futebol disponível para este perfil.")
         return
 
-    if subpagina == "Turmas":
+    if subpagina == "Agenda semanal":
+        st.caption("Treinos, jogos e campeonatos reunidos em uma única visão semanal.")
+        agenda_compromissos(
+            futebol_turmas,
+            eventos_futebol(futebol_turmas),
+            "Futebol",
+            "Treino",
+        )
+        st.divider()
+        painel_jogos_convocacoes(futebol_turmas)
+
+    elif subpagina == "Minhas turmas":
         cols = st.columns(2)
         for index, turma in enumerate(futebol_turmas):
             with cols[index % 2]:
-                card_turma(turma, "Futebol", "Turmas", key_suffix=f"futebol_{index}")
+                card_turma(turma, "Futebol", "Minhas turmas", key_suffix=f"futebol_{index}")
         selecionada = st.session_state.get(
             "turma_selecionada",
             futebol_turmas[0]["turma"] if futebol_turmas else "",
@@ -1479,91 +1819,11 @@ def futebol(perfil, professor):
                 col3.metric("Alunos na amostra", len(alunos_por_turma(selecionada)))
                 lista_alunos_com_acesso("Jogadores da turma", alunos_por_turma(selecionada))
 
-    elif subpagina == "Agenda jogo":
-        aba_agenda, aba_novo, aba_convocar = st.tabs(
-            ["Agenda de jogos", "Novo agendamento", "Convocar jogadores"]
-        )
-        with aba_agenda:
-            tabela_fechada("Jogos cadastrados", jogos_para_tabela())
-
-        with aba_novo:
-            with st.form("novo_jogo"):
-                col1, col2 = st.columns(2)
-                turma_nome = col1.selectbox("Turma", [turma["turma"] for turma in futebol_turmas])
-                data_jogo = col2.date_input("Data do jogo", value=date.today(), format="DD/MM/YYYY")
-                horario = col1.text_input("Horário", placeholder="Ex.: 09:00")
-                local = col2.text_input("Local", placeholder="Ex.: Campo Principal")
-                competicao = col1.text_input("Competição")
-                adversario = col2.text_input("Adversário")
-                salvar = st.form_submit_button("Salvar agendamento")
-            if salvar:
-                if not competicao or not adversario or not horario:
-                    st.error("Informe competição, adversário e horário.")
-                else:
-                    st.session_state.jogos.append(
-                        {
-                            "categoria": turma_nome.replace(" Futebol", ""),
-                            "turma": turma_nome,
-                            "competicao": competicao,
-                            "data": data_jogo.isoformat(),
-                            "horario": horario,
-                            "local": local or "A definir",
-                            "adversario": adversario,
-                            "status": "Agendado",
-                            "placar": "-",
-                        }
-                    )
-                    st.success("Agendamento incluído para demonstração.")
-
-        with aba_convocar:
-            jogos_agendados = [jogo for jogo in jogos_salvos() if jogo["status"] == "Agendado"]
-            if not jogos_agendados:
-                st.info("Nenhum jogo agendado disponível para convocação.")
-            else:
-                jogo_index = st.selectbox(
-                    "Jogo",
-                    range(len(jogos_agendados)),
-                    format_func=lambda indice: (
-                        f"{formatar_data_br(jogos_agendados[indice]['data'])} | "
-                        f"{jogos_agendados[indice].get('horario', '-')} | "
-                        f"{jogos_agendados[indice]['turma']} x {jogos_agendados[indice]['adversario']}"
-                    ),
-                )
-                jogo = jogos_agendados[jogo_index]
-                turma = next((item for item in futebol_turmas if item["turma"] == jogo["turma"]), None)
-                if not turma:
-                    st.warning("Turma do jogo não encontrada para este perfil.")
-                else:
-                    alunos = alunos_por_turma(turma["turma"])
-                    st.caption("Marque os jogadores convocados para gerar o PDF.")
-                    cabecalho = st.columns([3, 1.2, 2])
-                    cabecalho[0].markdown("**Jogador**")
-                    cabecalho[1].markdown("**Convocar**")
-                    cabecalho[2].markdown("**Turma**")
-                    convocados = []
-                    for aluno in alunos:
-                        linha = st.columns([3, 1.2, 2])
-                        linha[0].write(aluno["nome"])
-                        convocar = linha[1].checkbox(
-                            "Convocar",
-                            value=True,
-                            key=f"convocar_{jogo['data']}_{jogo['turma']}_{aluno['id']}",
-                            label_visibility="collapsed",
-                        )
-                        linha[2].write(aluno["turma"])
-                        if convocar:
-                            convocados.append(aluno["nome"])
-                    pdf = gerar_pdf_convocacao(jogo, turma, convocados)
-                    st.download_button(
-                        "Baixar PDF da convocação",
-                        data=pdf,
-                        file_name=f"convocacao_{jogo['turma'].lower().replace(' ', '_')}.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                    )
-
-    elif subpagina == "Agenda treinos":
-        agenda_semanal(futebol_turmas, "Futebol")
+    elif subpagina == "Chamada":
+        turmas = [turma["turma"] for turma in futebol_turmas]
+        turma_padrao = st.session_state.get("turma_selecionada", turmas[0])
+        turma = st.selectbox("Turma", turmas, index=turmas.index(turma_padrao) if turma_padrao in turmas else 0)
+        chamada_turma(turma)
 
     elif subpagina == "Resultados":
         tabela_fechada("Resultados", [item for item in jogos_salvos() if item["status"] == "Finalizado"])
@@ -1572,15 +1832,6 @@ def futebol(perfil, professor):
         placar = st.text_input("Placar", placeholder="Ex.: 2 x 1")
         if st.button("Salvar resultado de teste"):
             st.success(f"Resultado {placar or '-'} registrado para {jogo}.")
-
-    elif subpagina == "Chamada":
-        turmas = [turma["turma"] for turma in futebol_turmas]
-        if not turmas:
-            st.info("Nenhuma turma de futebol para este professor.")
-            return
-        turma_padrao = st.session_state.get("turma_selecionada", turmas[0])
-        turma = st.selectbox("Turma", turmas, index=turmas.index(turma_padrao) if turma_padrao in turmas else 0)
-        chamada_turma(turma)
 
 
 def gestao_matriculas():
