@@ -253,6 +253,36 @@ USUARIOS_INICIAIS = [
         "status": "Ativo",
         "vinculo": "Demonstração",
     },
+    {
+        "id": "USR-006",
+        "nome": "Professor Demonstração",
+        "usuario": "professor",
+        "senha": "casalar",
+        "email": "professor@casalar.org",
+        "perfil": "Professor",
+        "status": "Ativo",
+        "vinculo": "Oficinas",
+    },
+    {
+        "id": "USR-007",
+        "nome": "Gestor Demonstração",
+        "usuario": "gestor",
+        "senha": "casalar",
+        "email": "gestor@casalar.org",
+        "perfil": "Gestor",
+        "status": "Ativo",
+        "vinculo": "Secretaria",
+    },
+    {
+        "id": "USR-008",
+        "nome": "Diretor Demonstração",
+        "usuario": "diretor",
+        "senha": "casalar",
+        "email": "diretor@casalar.org",
+        "perfil": "Diretor",
+        "status": "Ativo",
+        "vinculo": "Diretoria",
+    },
 ]
 
 
@@ -1011,8 +1041,12 @@ def inicializar_usuarios():
     for usuario in st.session_state.usuarios:
         usuario.setdefault("usuario", usuario_para_login(usuario.get("email", "").split("@")[0]))
         usuario.setdefault("senha", "123456")
-    if not any(usuario.get("usuario") == "andre.matos" for usuario in st.session_state.usuarios):
-        st.session_state.usuarios.append(USUARIOS_INICIAIS[-1].copy())
+    usuarios_existentes = {
+        usuario_para_login(usuario.get("usuario")) for usuario in st.session_state.usuarios
+    }
+    for usuario_padrao in USUARIOS_INICIAIS:
+        if usuario_padrao["usuario"] not in usuarios_existentes:
+            st.session_state.usuarios.append(usuario_padrao.copy())
 
 
 def inicializar_jogos():
