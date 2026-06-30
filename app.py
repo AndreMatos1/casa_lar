@@ -78,6 +78,157 @@ ALUNOS = [
     },
 ]
 
+ALUNOS.extend(
+    [
+        {
+            "id": "ALU-006",
+            "nome": "Miguel Ferreira",
+            "idade": 9,
+            "responsavel": "Luciana Ferreira",
+            "telefone": "(11) 90000-0606",
+            "oficina": "Artes Cênicas",
+            "modalidade": "Teatro",
+            "turma": "Teatro Infantil",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-007",
+            "nome": "Sofia Mendes",
+            "idade": 10,
+            "responsavel": "Juliana Mendes",
+            "telefone": "(11) 90000-0707",
+            "oficina": "Artes Cênicas",
+            "modalidade": "Teatro",
+            "turma": "Teatro Infantil",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-008",
+            "nome": "Pedro Henrique Alves",
+            "idade": 11,
+            "responsavel": "Marta Alves",
+            "telefone": "(11) 90000-0808",
+            "oficina": "Artes Cênicas",
+            "modalidade": "Teatro",
+            "turma": "Teatro Infantil",
+            "professor": "Professor Demonstração",
+            "status": "Pendente",
+            "observacoes": "Autorização de imagem pendente",
+        },
+        {
+            "id": "ALU-009",
+            "nome": "Helena Ribeiro",
+            "idade": 8,
+            "responsavel": "Paulo Ribeiro",
+            "telefone": "(11) 90000-0909",
+            "oficina": "Música",
+            "modalidade": "Percussão",
+            "turma": "Percussão Criativa",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-010",
+            "nome": "Davi Souza",
+            "idade": 9,
+            "responsavel": "Carla Souza",
+            "telefone": "(11) 90000-1010",
+            "oficina": "Música",
+            "modalidade": "Percussão",
+            "turma": "Percussão Criativa",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-011",
+            "nome": "Laura Martins",
+            "idade": 10,
+            "responsavel": "Renato Martins",
+            "telefone": "(11) 90000-1111",
+            "oficina": "Música",
+            "modalidade": "Percussão",
+            "turma": "Percussão Criativa",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-012",
+            "nome": "Arthur Gomes",
+            "idade": 9,
+            "responsavel": "Daniela Gomes",
+            "telefone": "(11) 90000-1212",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-10 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-013",
+            "nome": "Enzo Carvalho",
+            "idade": 10,
+            "responsavel": "Marcelo Carvalho",
+            "telefone": "(11) 90000-1313",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-10 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-014",
+            "nome": "Gabriel Rocha",
+            "idade": 9,
+            "responsavel": "Tatiana Rocha",
+            "telefone": "(11) 90000-1414",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-10 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Pendente",
+            "observacoes": "Atestado médico pendente",
+        },
+        {
+            "id": "ALU-015",
+            "nome": "Lucas Barbosa",
+            "idade": 15,
+            "responsavel": "Simone Barbosa",
+            "telefone": "(11) 90000-1515",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-16 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-016",
+            "nome": "Matheus Freitas",
+            "idade": 16,
+            "responsavel": "Sandra Freitas",
+            "telefone": "(11) 90000-1616",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-16 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+        {
+            "id": "ALU-017",
+            "nome": "Vinicius Moraes",
+            "idade": 15,
+            "responsavel": "Aline Moraes",
+            "telefone": "(11) 90000-1717",
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-16 Futebol",
+            "professor": "Professor Demonstração",
+            "status": "Ativo",
+        },
+    ]
+)
+
 
 TURMAS = [
     {
@@ -137,6 +288,55 @@ TURMAS = [
     },
 ]
 
+TURMAS.extend(
+    [
+        {
+            "oficina": "Artes Cênicas",
+            "modalidade": "Teatro",
+            "turma": "Teatro Infantil",
+            "professor": "Professor Demonstração",
+            "dias": ["Segunda", "Quarta"],
+            "horario": "10:30 - 12:00",
+            "local": "Sala Multiuso",
+            "vagas": 20,
+            "matriculados": 16,
+        },
+        {
+            "oficina": "Música",
+            "modalidade": "Percussão",
+            "turma": "Percussão Criativa",
+            "professor": "Professor Demonstração",
+            "dias": ["Terça", "Quinta"],
+            "horario": "14:00 - 15:30",
+            "local": "Sala de Música",
+            "vagas": 18,
+            "matriculados": 14,
+        },
+        {
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-10 Futebol",
+            "professor": "Professor Demonstração",
+            "dias": ["Segunda", "Quarta", "Sexta"],
+            "horario": "16:00 - 17:30",
+            "local": "Campo Principal",
+            "vagas": 24,
+            "matriculados": 19,
+        },
+        {
+            "oficina": "Esportes",
+            "modalidade": "Futebol",
+            "turma": "Sub-16 Futebol",
+            "professor": "Professor Demonstração",
+            "dias": ["Terça", "Quinta"],
+            "horario": "18:00 - 19:30",
+            "local": "Campo Principal",
+            "vagas": 25,
+            "matriculados": 22,
+        },
+    ]
+)
+
 
 JOGOS = [
     {
@@ -163,6 +363,77 @@ JOGOS = [
     },
 ]
 
+JOGOS.extend(
+    [
+        {
+            "categoria": "Sub-10",
+            "turma": "Sub-10 Futebol",
+            "competicao": "Festival Casa Lar",
+            "data": "2026-07-05",
+            "horario": "08:00",
+            "local": "Campo Principal",
+            "adversario": "Projeto Semente",
+            "status": "Agendado",
+            "placar": "-",
+        },
+        {
+            "categoria": "Sub-10",
+            "turma": "Sub-10 Futebol",
+            "competicao": "Festival Casa Lar",
+            "data": "2026-07-05",
+            "horario": "11:00",
+            "local": "Campo Principal",
+            "adversario": "Clube do Bairro",
+            "status": "Agendado",
+            "placar": "-",
+        },
+        {
+            "categoria": "Sub-16",
+            "turma": "Sub-16 Futebol",
+            "competicao": "Festival Casa Lar",
+            "data": "2026-07-05",
+            "horario": "14:30",
+            "local": "Campo Principal",
+            "adversario": "Instituto Futuro",
+            "status": "Agendado",
+            "placar": "-",
+        },
+        {
+            "categoria": "Sub-16",
+            "turma": "Sub-16 Futebol",
+            "competicao": "Festival Casa Lar",
+            "data": "2026-07-05",
+            "horario": "17:00",
+            "local": "Campo Principal",
+            "adversario": "Academia Jovem",
+            "status": "Agendado",
+            "placar": "-",
+        },
+        {
+            "categoria": "Sub-10",
+            "turma": "Sub-10 Futebol",
+            "competicao": "Liga Comunitária",
+            "data": "2026-06-21",
+            "horario": "09:30",
+            "local": "Campo Municipal",
+            "adversario": "Escola Campeã",
+            "status": "Finalizado",
+            "placar": "2 x 1",
+        },
+        {
+            "categoria": "Sub-16",
+            "turma": "Sub-16 Futebol",
+            "competicao": "Liga Comunitária",
+            "data": "2026-06-21",
+            "horario": "15:30",
+            "local": "Campo Municipal",
+            "adversario": "União Esportiva",
+            "status": "Finalizado",
+            "placar": "1 x 2",
+        },
+    ]
+)
+
 
 EVENTOS_OFICINAS = [
     {
@@ -180,6 +451,22 @@ EVENTOS_OFICINAS = [
         "titulo": "Mostra Cultural Casa Lar",
         "turma": "Danças Urbanas I",
         "local": "Praça da Comunidade",
+    },
+    {
+        "data": "2026-07-04",
+        "horario": "14:00",
+        "tipo": "Ensaio",
+        "titulo": "Ensaio aberto de Teatro",
+        "turma": "Teatro Infantil",
+        "local": "Sala Multiuso",
+    },
+    {
+        "data": "2026-07-05",
+        "horario": "11:30",
+        "tipo": "Apresentação",
+        "titulo": "Roda de Percussão",
+        "turma": "Percussão Criativa",
+        "local": "Pátio Central",
     },
 ]
 
@@ -1052,6 +1339,15 @@ def inicializar_usuarios():
 def inicializar_jogos():
     if "jogos" not in st.session_state:
         st.session_state.jogos = [jogo.copy() for jogo in JOGOS]
+        return
+    jogos_existentes = {
+        (jogo.get("turma"), jogo.get("data"), jogo.get("horario"))
+        for jogo in st.session_state.jogos
+    }
+    for jogo_padrao in JOGOS:
+        chave = (jogo_padrao.get("turma"), jogo_padrao.get("data"), jogo_padrao.get("horario"))
+        if chave not in jogos_existentes:
+            st.session_state.jogos.append(jogo_padrao.copy())
 
 
 def usuarios_para_exibicao(usuarios):
@@ -1396,6 +1692,38 @@ def metricas():
     col2.metric("Cadastros pendentes", pendentes)
     col3.metric("Turmas", len(TURMAS))
     col4.metric("Jogos", len(jogos_salvos()))
+
+
+def percentual_ocupacao(turmas):
+    vagas = sum(turma["vagas"] for turma in turmas)
+    matriculados = sum(turma["matriculados"] for turma in turmas)
+    return round((matriculados / vagas) * 100) if vagas else 0
+
+
+def contar_vitorias(jogos):
+    vitorias = 0
+    for jogo in jogos:
+        if jogo.get("status") != "Finalizado" or "x" not in jogo.get("placar", ""):
+            continue
+        try:
+            casa, visitante = [int(valor.strip()) for valor in jogo["placar"].split("x")]
+        except ValueError:
+            continue
+        if casa > visitante:
+            vitorias += 1
+    return vitorias
+
+
+def indicadores_operacionais():
+    total_vagas = sum(turma["vagas"] for turma in TURMAS)
+    total_matriculados = sum(turma["matriculados"] for turma in TURMAS)
+    vagas_disponiveis = total_vagas - total_matriculados
+    agendados = len([jogo for jogo in jogos_salvos() if jogo["status"] == "Agendado"])
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Matrículas nas turmas", total_matriculados)
+    col2.metric("Vagas disponíveis", vagas_disponiveis)
+    col3.metric("Ocupação geral", f"{percentual_ocupacao(TURMAS)}%")
+    col4.metric("Próximos jogos", agendados)
 
 
 def card_turma(turma, destino="Oficinas", subpagina="Minhas turmas", key_suffix=""):
@@ -2134,18 +2462,48 @@ def dashboard():
 
     if subpagina == "Indicadores":
         metricas()
-        st.subheader("Alunos por status")
-        status = {}
+        indicadores_operacionais()
+        status_alunos = {}
         for aluno in ALUNOS:
-            status[aluno["status"]] = status.get(aluno["status"], 0) + 1
-        st.bar_chart(status)
+            status_alunos[aluno["status"]] = status_alunos.get(aluno["status"], 0) + 1
+        turmas_modalidade = {}
+        for turma in TURMAS:
+            turmas_modalidade[turma["modalidade"]] = turmas_modalidade.get(turma["modalidade"], 0) + 1
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Alunos por status")
+            st.bar_chart(status_alunos)
+        with col2:
+            st.subheader("Turmas por modalidade")
+            st.bar_chart(turmas_modalidade)
+
     elif subpagina == "Oficinas":
+        oficinas = [turma for turma in TURMAS if turma["modalidade"] != "Futebol"]
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Turmas de oficinas", len(oficinas))
+        col2.metric("Matrículas", sum(turma["matriculados"] for turma in oficinas))
+        col3.metric("Ocupação", f"{percentual_ocupacao(oficinas)}%")
+        col4.metric("Eventos especiais", len(EVENTOS_OFICINAS))
         st.subheader("Matrículas por turma")
-        st.bar_chart({turma["turma"]: turma["matriculados"] for turma in TURMAS})
-        tabela_fechada("Dados das oficinas", TURMAS)
+        st.bar_chart({turma["turma"]: turma["matriculados"] for turma in oficinas})
+        tabela_fechada("Dados das oficinas", oficinas)
+
     elif subpagina == "Esportivo":
+        turmas_futebol = [turma for turma in TURMAS if turma["modalidade"] == "Futebol"]
+        jogos = jogos_salvos()
+        finalizados = [jogo for jogo in jogos if jogo["status"] == "Finalizado"]
+        agendados = [jogo for jogo in jogos if jogo["status"] == "Agendado"]
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Turmas de futebol", len(turmas_futebol))
+        col2.metric("Jogos agendados", len(agendados))
+        col3.metric("Jogos finalizados", len(finalizados))
+        col4.metric("Vitórias", contar_vitorias(finalizados))
         st.subheader("Resumo esportivo")
-        tabela_fechada("Jogos e resultados", jogos_para_tabela())
+        jogos_categoria = {}
+        for jogo in jogos:
+            jogos_categoria[jogo["categoria"]] = jogos_categoria.get(jogo["categoria"], 0) + 1
+        st.bar_chart(jogos_categoria)
+        tabela_fechada("Jogos e resultados", jogos)
 
 
 aplicar_estilo()
