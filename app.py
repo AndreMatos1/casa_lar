@@ -362,6 +362,62 @@ def aplicar_estilo():
         <style>
         .block-container {
             padding-top: 1.8rem;
+            padding-bottom: 3rem;
+        }
+        .page-heading {
+            margin: 0 0 1.15rem 0;
+            padding: 0 0 0.85rem 0;
+            border-bottom: 1px solid #d0d5dd;
+        }
+        .page-heading h1 {
+            margin: 0;
+            color: #101828;
+            font-size: 1.85rem;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        div[data-testid="stMetric"] {
+            min-height: 112px;
+            padding: 14px 16px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+        }
+        div[data-testid="stMetric"] label {
+            color: #475467;
+            font-weight: 700;
+        }
+        div[data-testid="stForm"] {
+            padding: 18px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+        }
+        div[data-testid="stExpander"] {
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+        div[data-testid="stDataFrame"] {
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        div[data-baseweb="tab-list"] {
+            gap: 4px;
+            border-bottom: 1px solid #d0d5dd;
+        }
+        button[data-baseweb="tab"] {
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+        }
+        div[data-testid="stAlert"] {
+            border-radius: 8px;
         }
         div.stButton > button {
             width: 100%;
@@ -526,7 +582,7 @@ def aplicar_estilo():
         }
         .card {
             border: 1px solid #d9e2ec;
-            border-radius: 14px;
+            border-radius: 8px;
             padding: 14px 16px;
             background: #ffffff;
             box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
@@ -705,6 +761,13 @@ def aplicar_estilo():
         }
         </style>
         """,
+        unsafe_allow_html=True,
+    )
+
+
+def cabecalho_pagina(titulo):
+    st.markdown(
+        f"<div class='page-heading'><h1>{escape(titulo)}</h1></div>",
         unsafe_allow_html=True,
     )
 
@@ -1527,7 +1590,7 @@ def chamada_turma(turma_nome):
 
 def inicio(perfil, professor):
     exibir_logo_inicio()
-    st.title("Irmã Carmen Casa Lar")
+    cabecalho_pagina("Irmã Carmen Casa Lar")
     st.caption("Protótipo inicial em Streamlit com foco na rotina de professores, gestores e diretores.")
     metricas()
 
@@ -1551,7 +1614,7 @@ def inicio(perfil, professor):
 
 
 def alunos(perfil, professor):
-    st.header("Alunos")
+    cabecalho_pagina("Alunos")
     subpagina = botoes_submenu("Alunos")
 
     base = alunos_do_professor(professor) if perfil == "Professor" else ALUNOS
@@ -1602,7 +1665,7 @@ def alunos(perfil, professor):
 
 
 def oficinas(perfil, professor):
-    st.header("Oficinas")
+    cabecalho_pagina("Oficinas")
     subpagina = botoes_submenu("Oficinas")
     base_turmas = turmas_do_professor(professor) if perfil == "Professor" else TURMAS
     base_turmas = [turma for turma in base_turmas if turma["modalidade"] != "Futebol"]
@@ -1666,7 +1729,7 @@ def oficinas(perfil, professor):
 
 
 def agenda():
-    st.header("Agenda")
+    cabecalho_pagina("Agenda")
     subpagina = botoes_submenu("Agenda")
 
     if subpagina == "Aulas":
@@ -1779,7 +1842,7 @@ def painel_jogos_convocacoes(futebol_turmas):
 
 
 def futebol(perfil, professor):
-    st.header("Futebol")
+    cabecalho_pagina("Futebol")
     subpagina = botoes_submenu("Futebol")
     futebol_turmas = [item for item in TURMAS if item["modalidade"] == "Futebol"]
     if perfil == "Professor":
@@ -1835,7 +1898,7 @@ def futebol(perfil, professor):
 
 
 def gestao_matriculas():
-    st.header("Gestão de cadastro")
+    cabecalho_pagina("Gestão de cadastro")
     subpagina = botoes_submenu("Gestao de matriculas")
 
     if subpagina == "Cadastrar nova atividade":
@@ -1887,7 +1950,7 @@ def gestao_matriculas():
 
 
 def digitalizacao():
-    st.header("Digitalização")
+    cabecalho_pagina("Digitalização")
     subpagina = botoes_submenu("Digitalizacao")
 
     if subpagina == "Enviar ficha":
@@ -1905,7 +1968,7 @@ def digitalizacao():
 
 def usuarios():
     inicializar_usuarios()
-    st.header("Gestão de usuários")
+    cabecalho_pagina("Gestão de usuários")
     subpagina = botoes_submenu("Usuarios")
 
     if subpagina == "Lista":
@@ -2028,7 +2091,7 @@ def usuarios():
 
 
 def dashboard():
-    st.header("Dashboard da direção")
+    cabecalho_pagina("Dashboard da direção")
     subpagina = botoes_submenu("Dashboard")
 
     if subpagina == "Indicadores":
