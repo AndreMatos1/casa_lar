@@ -574,7 +574,6 @@ USUARIOS_INICIAIS = [
 
 
 DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
-DIA_ATUAL_DEMO = "Sexta"
 
 
 MENU_POR_PERFIL = {
@@ -606,7 +605,7 @@ MENU_POR_PERFIL = {
 SUBMENUS = {
     "Alunos": ["Consulta", "Meus alunos", "Cadastro", "Pendencias"],
     "Oficinas": ["Agenda semanal", "Minhas turmas", "Chamada"],
-    "Agenda": ["Aulas", "Jogos", "Treinos", "Recados"],
+    "Agenda": ["Agenda semanal", "Recados"],
     "Futebol": ["Agenda semanal", "Minhas turmas", "Chamada", "Resultados"],
     "Gestao de matriculas": [
         "Cadastrar nova atividade",
@@ -628,8 +627,6 @@ ROTULOS = {
     "Pendencias": "Pendências",
     "Digitalizacao": "Digitalização",
     "Usuarios": "Usuários",
-    "Agenda jogo": "Agenda de jogos",
-    "Agenda treinos": "Agenda de treinos",
     "Meus alunos": "Meus alunos",
     "Minhas turmas": "Minhas turmas",
     "Cadastrar nova atividade": "Cadastrar nova atividade",
@@ -907,79 +904,6 @@ def aplicar_estilo():
         }
         .card strong {
             color: #0f172a;
-        }
-        .today-card {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-        .agenda-grid {
-            display: grid;
-            grid-template-columns: repeat(7, minmax(145px, 1fr));
-            border: 1px solid #d9e2ec;
-            border-radius: 14px;
-            overflow-x: auto;
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
-        }
-        .agenda-day {
-            min-height: 316px;
-            padding: 10px;
-            border-right: 1px solid #e5edf5;
-            border-bottom: 1px solid #e5edf5;
-            border-radius: 0;
-            background:
-                linear-gradient(#eef3f8 1px, transparent 1px),
-                linear-gradient(90deg, #f3f6fa 1px, transparent 1px),
-                #ffffff;
-            background-size: 100% 56px, 56px 100%, 100% 100%;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-        .agenda-day.today {
-            border-color: #2563eb;
-            background:
-                linear-gradient(#dceafe 1px, transparent 1px),
-                linear-gradient(90deg, #e7efff 1px, transparent 1px),
-                #f8fbff;
-            background-size: 100% 56px, 56px 100%, 100% 100%;
-        }
-        .agenda-day .card {
-            margin-bottom: 10px;
-        }
-        .agenda-event {
-            display: block;
-            min-height: 76px;
-            margin-top: 10px;
-            padding: 12px;
-            border: 1px solid #d9e2ec;
-            border-radius: 10px;
-            background: rgba(248, 250, 252, 0.92);
-            color: #0f172a !important;
-            text-align: center;
-            text-decoration: none !important;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
-        }
-        .agenda-event:hover {
-            border-color: #2563eb;
-            background: #edf4ff;
-        }
-        .agenda-slot {
-            min-height: 76px;
-            padding: 12px;
-            border: 1px solid #d9e2ec;
-            border-radius: 10px;
-            background: rgba(248, 250, 252, 0.92);
-            text-align: center;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
-        }
-        .agenda-empty {
-            color: #98a2b3;
-            font-size: 0.9rem;
-            padding: 12px 2px;
-        }
-        @media (max-width: 900px) {
-            .agenda-grid {
-                grid-template-columns: repeat(7, minmax(190px, 1fr));
-            }
         }
         .week-calendar {
             display: grid;
@@ -1855,37 +1779,6 @@ def eventos_oficinas(turmas):
     return [evento for evento in EVENTOS_OFICINAS if evento["turma"] in turmas_permitidas]
 
 
-def agenda_semanal(turmas, destino="Oficinas"):
-    st.subheader("Agenda semanal")
-    cols = st.columns(len(DIAS_SEMANA))
-    for dia_index, (col, dia) in enumerate(zip(cols, DIAS_SEMANA)):
-        eventos = [turma for turma in turmas if dia in turma["dias"]]
-        classe = "agenda-day today" if dia == DIA_ATUAL_DEMO else "agenda-day"
-        with col:
-            st.markdown(
-                "<div class='{classe}'>"
-                "<div class='card {today_card}'><strong>{dia}</strong><br>"
-                "<span class='muted'>{rotulo}</span></div>".format(
-                    classe=classe,
-                    today_card="today-card" if dia == DIA_ATUAL_DEMO else "",
-                    dia=escape(dia),
-                    rotulo="Hoje" if dia == DIA_ATUAL_DEMO else "Semana",
-                ),
-                unsafe_allow_html=True,
-            )
-            if not eventos:
-                st.markdown("<div class='agenda-empty'>Sem atividades</div>", unsafe_allow_html=True)
-            for evento_index, turma in enumerate(eventos):
-                nav_link(
-                    f"{turma['horario']} | {turma['turma']}",
-                    destino,
-                    "Minhas turmas",
-                    turma["turma"],
-                    key_suffix=f"agenda_{destino}_{dia_index}_{evento_index}",
-                )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-
 def chamada_turma(turma_nome):
     alunos = alunos_por_turma(turma_nome)
     st.subheader(f"Chamada - {turma_nome}")
@@ -2098,13 +1991,26 @@ def agenda():
     cabecalho_pagina("Agenda")
     subpagina = botoes_submenu("Agenda")
 
-    if subpagina == "Aulas":
-        agenda_semanal(TURMAS)
-    elif subpagina == "Jogos":
-        tabela_fechada("Agenda de jogos", jogos_para_tabela())
-    elif subpagina == "Treinos":
-        treinos = [turma for turma in TURMAS if turma["modalidade"] == "Futebol"]
-        agenda_semanal(treinos, "Futebol")
+    if subpagina == "Agenda semanal":
+        col1, col2 = st.columns(2)
+        area = col1.selectbox("Área", ["Todas", "Oficinas", "Futebol"])
+        professores = ["Todos"] + sorted({turma["professor"] for turma in TURMAS})
+        professor = col2.selectbox("Professor", professores)
+
+        turmas = TURMAS
+        if area == "Oficinas":
+            turmas = [turma for turma in turmas if turma["modalidade"] != "Futebol"]
+        elif area == "Futebol":
+            turmas = [turma for turma in turmas if turma["modalidade"] == "Futebol"]
+        if professor != "Todos":
+            turmas = [turma for turma in turmas if turma["professor"] == professor]
+
+        turmas_futebol = [turma for turma in turmas if turma["modalidade"] == "Futebol"]
+        turmas_oficinas = [turma for turma in turmas if turma["modalidade"] != "Futebol"]
+        eventos = eventos_futebol(turmas_futebol) + eventos_oficinas(turmas_oficinas)
+        st.caption("Aulas, treinos, jogos, ensaios e apresentações reunidos na mesma semana.")
+        agenda_compromissos(turmas, eventos, "Agenda", None)
+
     elif subpagina == "Recados":
         st.selectbox("Aluno", [item["nome"] for item in ALUNOS])
         st.text_area("Mensagem", "Ola, temos um comunicado da Casa Lar sobre a proxima atividade.")
