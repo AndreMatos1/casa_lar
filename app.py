@@ -909,7 +909,7 @@ def aplicar_estilo():
             gap: 0;
             align-items: stretch;
             overflow-x: auto;
-            border: 1px solid #d0d5dd;
+            border: 1px solid #aeb8c7;
             border-radius: 10px;
             background: #ffffff;
             box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
@@ -920,13 +920,13 @@ def aplicar_estilo():
         div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) {
             min-height: 430px;
             border: 0;
-            border-right: 1px solid #e4e7ec;
+            border-right: 1px solid #c7d0dc;
             border-radius: 0;
             background:
                 linear-gradient(#eef2f6 1px, transparent 1px),
                 #ffffff;
             background-size: 100% 58px;
-            box-shadow: none;
+            box-shadow: inset 0 0 0 1px #e0e6ee;
         }
         div[data-testid="stColumn"]:last-child div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) {
             border-right: 0;
@@ -940,10 +940,14 @@ def aplicar_estilo():
             display: none;
         }
         .week-day-header {
-            padding: 10px 8px;
-            border-bottom: 1px solid #d0d5dd;
-            background: #f8fafc;
+            margin: 2px 2px 8px 2px;
+            padding: 9px 8px;
+            border: 1px solid #aebbd0;
+            border-bottom: 2px solid #94a3b8;
+            border-radius: 6px;
+            background: #f3f6fa;
             text-align: center;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
         }
         .week-day-header strong {
             display: block;
@@ -958,10 +962,10 @@ def aplicar_estilo():
             background: #dbeafe;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button {
-            min-height: 76px;
+            min-height: 68px;
             height: auto;
-            margin-bottom: 8px;
-            padding: 9px 10px;
+            margin-bottom: 7px;
+            padding: 7px 9px;
             border: 1px solid #bfdbfe;
             border-left: 4px solid #2563eb;
             border-radius: 6px;
@@ -970,7 +974,7 @@ def aplicar_estilo():
             justify-content: flex-start;
             text-align: left;
             white-space: normal;
-            line-height: 1.25;
+            line-height: 1.2;
             box-shadow: none;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button:hover {
@@ -979,9 +983,12 @@ def aplicar_estilo():
             color: #1746a2;
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button p {
-            font-size: 0.78rem;
-            font-weight: 800;
+            font-size: 0.71rem;
+            font-weight: 400;
             text-align: left;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button strong {
+            font-weight: 800;
         }
         .calendar-empty {
             padding: 14px 8px;
