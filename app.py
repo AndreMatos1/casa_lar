@@ -905,35 +905,41 @@ def aplicar_estilo():
         .card strong {
             color: #0f172a;
         }
-        .week-calendar {
-            display: grid;
-            grid-template-columns: repeat(7, minmax(150px, 1fr));
-            border: 1px solid #d0d5dd;
-            border-radius: 12px;
+        div[data-testid="stHorizontalBlock"]:has(.calendar-day-marker) {
+            gap: 0;
+            align-items: stretch;
             overflow-x: auto;
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
             background: #ffffff;
             box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
         }
-        .week-day {
+        div[data-testid="stHorizontalBlock"]:has(.calendar-day-marker) > div[data-testid="stColumn"] {
+            min-width: 150px;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) {
             min-height: 430px;
+            border: 0;
             border-right: 1px solid #e4e7ec;
+            border-radius: 0;
             background:
                 linear-gradient(#eef2f6 1px, transparent 1px),
                 #ffffff;
             background-size: 100% 58px;
+            box-shadow: none;
         }
-        .week-day:last-child {
+        div[data-testid="stColumn"]:last-child div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) {
             border-right: 0;
         }
-        .week-day.is-today {
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-current-day) {
             background:
                 linear-gradient(#dbeafe 1px, transparent 1px),
                 #f8fbff;
         }
+        .calendar-day-marker {
+            display: none;
+        }
         .week-day-header {
-            position: sticky;
-            top: 0;
-            z-index: 1;
             padding: 10px 8px;
             border-bottom: 1px solid #d0d5dd;
             background: #f8fafc;
@@ -948,42 +954,34 @@ def aplicar_estilo():
             color: #667085;
             font-size: 0.78rem;
         }
-        .week-day.is-today .week-day-header {
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-current-day) .week-day-header {
             background: #dbeafe;
         }
-        .calendar-events {
-            padding: 8px;
-        }
-        .calendar-event {
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button {
+            min-height: 76px;
+            height: auto;
             margin-bottom: 8px;
-            padding: 8px;
+            padding: 9px 10px;
             border: 1px solid #bfdbfe;
             border-left: 4px solid #2563eb;
             border-radius: 6px;
             background: #eff6ff;
             color: #172033;
+            justify-content: flex-start;
+            text-align: left;
+            white-space: normal;
+            line-height: 1.25;
+            box-shadow: none;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button:hover {
+            border-color: #2563eb;
+            background: #dbeafe;
+            color: #1746a2;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.calendar-day-marker) div.stButton > button p {
             font-size: 0.78rem;
-            line-height: 1.3;
-        }
-        .calendar-event.event-game {
-            border-color: #fecaca;
-            border-left-color: #dc2626;
-            background: #fff1f2;
-        }
-        .calendar-event.event-rehearsal {
-            border-color: #fde68a;
-            border-left-color: #d97706;
-            background: #fffbeb;
-        }
-        .calendar-event.event-presentation {
-            border-color: #bbf7d0;
-            border-left-color: #16a34a;
-            background: #f0fdf4;
-        }
-        .calendar-event-time {
-            display: block;
             font-weight: 800;
-            margin-bottom: 3px;
+            text-align: left;
         }
         .calendar-empty {
             padding: 14px 8px;
@@ -992,8 +990,8 @@ def aplicar_estilo():
             text-align: center;
         }
         @media (max-width: 1100px) {
-            .week-calendar {
-                grid-template-columns: repeat(7, minmax(175px, 1fr));
+            div[data-testid="stHorizontalBlock"]:has(.calendar-day-marker) > div[data-testid="stColumn"] {
+                min-width: 175px;
             }
         }
         .muted {
@@ -1671,14 +1669,6 @@ def inicio_semana_atual():
     return hoje - timedelta(days=hoje.weekday())
 
 
-def classe_evento(tipo):
-    return {
-        "Jogo": "event-game",
-        "Ensaio": "event-rehearsal",
-        "Apresentação": "event-presentation",
-    }.get(tipo, "")
-
-
 def compromissos_recorrentes(turmas, data_dia, tipo):
     dia_semana = DIAS_SEMANA[data_dia.weekday()]
     return [
@@ -1693,6 +1683,15 @@ def compromissos_recorrentes(turmas, data_dia, tipo):
         for turma in turmas
         if dia_semana in turma["dias"]
     ]
+
+
+def destino_compromisso(evento):
+    turma_nome = evento.get("turma")
+    turma = next((item for item in TURMAS if item["turma"] == turma_nome), None)
+    if not turma:
+        return None
+    pagina = "Futebol" if turma["modalidade"] == "Futebol" else "Oficinas"
+    return pagina, "Minhas turmas", turma_nome
 
 
 def agenda_compromissos(turmas, eventos_pontuais, contexto, tipo_recorrente):
@@ -1718,8 +1717,8 @@ def agenda_compromissos(turmas, eventos_pontuais, contexto, tipo_recorrente):
         st.session_state[chave] = (inicio + timedelta(days=7)).isoformat()
         st.rerun()
 
-    dias_html = []
-    for deslocamento, nome_dia in enumerate(DIAS_SEMANA):
+    colunas_dias = st.columns(len(DIAS_SEMANA))
+    for deslocamento, (coluna, nome_dia) in enumerate(zip(colunas_dias, DIAS_SEMANA)):
         data_dia = inicio + timedelta(days=deslocamento)
         eventos = compromissos_recorrentes(turmas, data_dia, tipo_recorrente)
         eventos.extend(
@@ -1727,35 +1726,42 @@ def agenda_compromissos(turmas, eventos_pontuais, contexto, tipo_recorrente):
         )
         eventos.sort(key=lambda evento: evento.get("horario", "99:99"))
 
-        eventos_html = []
-        for evento in eventos:
-            tipo = escape(evento.get("tipo", "Compromisso"))
-            titulo = escape(evento.get("titulo", evento.get("turma", "Compromisso")))
-            horario = escape(evento.get("horario", ""))
-            local = escape(evento.get("local", "A definir"))
-            eventos_html.append(
-                f"<div class='calendar-event {classe_evento(evento.get('tipo'))}'>"
-                f"<span class='calendar-event-time'>{horario} | {tipo}</span>"
-                f"<strong>{titulo}</strong><br><span>{local}</span></div>"
-            )
-        if not eventos_html:
-            eventos_html.append("<div class='calendar-empty'>Sem compromissos</div>")
+        with coluna:
+            with st.container(border=True):
+                classe_hoje = " calendar-current-day" if data_dia == date.today() else ""
+                st.markdown(
+                    f"<span class='calendar-day-marker{classe_hoje}'></span>"
+                    f"<div class='week-day-header'><strong>{escape(nome_dia)}</strong>"
+                    f"<span>{data_dia.strftime('%d/%m')}</span></div>",
+                    unsafe_allow_html=True,
+                )
+                if not eventos:
+                    st.markdown(
+                        "<div class='calendar-empty'>Sem compromissos</div>",
+                        unsafe_allow_html=True,
+                    )
+                for indice, evento in enumerate(eventos):
+                    tipo = evento.get("tipo", "Compromisso")
+                    titulo = evento.get("titulo", evento.get("turma", "Compromisso"))
+                    horario = evento.get("horario", "")
+                    local = evento.get("local", "A definir")
+                    rotulo = f"**{horario} | {tipo}**  \n{titulo}  \n{local}"
+                    chave_evento = (
+                        f"evento_{contexto}_{data_dia.isoformat()}_{indice}_"
+                        f"{evento.get('turma', titulo)}_{tipo}"
+                    )
+                    if st.button(
+                        rotulo,
+                        key=chave_evento,
+                        help=f"Abrir turma {evento.get('turma', titulo)}",
+                        use_container_width=True,
+                    ):
+                        destino = destino_compromisso(evento)
+                        if destino:
+                            navegar_para(*destino)
+                            st.rerun()
 
-        hoje_classe = " is-today" if data_dia == date.today() else ""
-        dias_html.append(
-            f"<div class='week-day{hoje_classe}'>"
-            f"<div class='week-day-header'><strong>{nome_dia}</strong>"
-            f"<span>{data_dia.strftime('%d/%m')}</span></div>"
-            f"<div class='calendar-events'>{''.join(eventos_html)}</div></div>"
-        )
-
-    st.markdown(
-        f"<div class='week-calendar'>{''.join(dias_html)}</div>",
-        unsafe_allow_html=True,
-    )
-    st.caption(
-        "Azul: aulas ou treinos | Vermelho: jogos | Amarelo: ensaios | Verde: apresentações"
-    )
+    st.caption("Clique em um compromisso para abrir diretamente a turma correspondente.")
 
 
 def eventos_futebol(turmas):
